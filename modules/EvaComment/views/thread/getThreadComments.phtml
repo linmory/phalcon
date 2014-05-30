@@ -19,7 +19,7 @@
                         <h4 class="name"><?=$comment->username ?></h4>
                         <p class="comment"><?=htmlspecialchars($comment->content) ?></p>
                         <div class="row">
-                            <div class="time span"><?=$this->tag->passTime($comment->createdAt) ?></div>
+                            <div class="time span agotime" data-time="<?=date('c',$comment->createdAt) ?>"><?=date('Y年m月d日 H:i',$comment->createdAt) ?></div>
                             <div class="toolbar right">
 <!--                                        <span class="button">-->
 <!--                                            <i class="icon-thumbs-up"></i>-->
@@ -50,7 +50,7 @@
                                     <div class="span">
                                         <h4 class="name"><?=$childrenComment->username ?></h4>
                                         <p class="comment"><?=htmlspecialchars($childrenComment->content) ?></p>
-                                        <div class="time span"><?=$this->tag->passTime($childrenComment->createdAt) ?></div>
+                                        <div class="time span agotime" data-time="<?=date('c',$childrenComment->createdAt) ?>"><?=date('Y年m月d日 H:i',$childrenComment->createdAt) ?></div>
                                     </div>
                                 </div>
                             </li>
@@ -64,5 +64,5 @@
 
         </ul>
     </div>
-    <div class="more">显示更多评论</div>
+<!--    <div class="more">显示更多评论</div>-->
 </div>

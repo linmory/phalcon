@@ -45,6 +45,7 @@ class ThreadController extends ControllerBase
      */
     public function getThreadCommentsAction($uniqueKey)
     {
+
         $displayDepth = $this->request->getQuery('displayDepth');
         $sorter = $this->request->getQuery('sorter');
 
@@ -72,6 +73,15 @@ class ThreadController extends ControllerBase
             }
         }
 
+        $cacheKey = $uniqueKey.'###'.$thread->numComments;
+
+        $this->view->cache(
+            array(
+                "lifetime" => 86400,
+                "key"      => $cacheKey,
+            )
+        );
+
 //        $viewMode = $this->dispatcher->getParam('view');
 
         $commentManager = new CommentManager();
@@ -94,10 +104,6 @@ class ThreadController extends ControllerBase
             default:
                 $comments = $commentManager->findCommentTreeByThread($thread, $sorter, $displayDepth);
                 break;
-        }
-
-        foreach($comments as $comment){
-
         }
 
         $this->view->setVars(
