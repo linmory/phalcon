@@ -16,7 +16,7 @@ return array(
         'action' => 1,
         'id' => 3,
     ),
-    '/post/(\w+)' =>  array(
+    '/post/([\w-_]+)' =>  array(
         'module' => 'WscnGold',
         'controller' => 'post',
         'action' => 'article',
@@ -39,7 +39,7 @@ return array(
         'controller' => 'index',
         'action' => 'tutorial',
     ),
-    '/tutorial/(\w+)' =>  array(
+    '/tutorial/([\w-_]+)' =>  array(
         'module' => 'WscnGold',
         'controller' => 'index',
         'action' => 'tutorial',
