@@ -82,7 +82,7 @@
                     <?foreach($posts as $post):?>
                     <li class="item"><a class="link" href="/post/<?=$post->slug?>"><?=$this->escaper->escapeHtmlAttr($post->title)?></a></li>
                     <?endforeach?>
-                    <li class="more"><a class="link" href="/news/list?cid=5">更多 &gt;&gt;</a></li>
+                    <li class="more"><a class="link" href="/news/list?cid=8">更多 &gt;&gt;</a></li>
                 </ul>
                 <?$pager = $this->tag->component('post', array('status' => 'published', 'cid' => 13 ,'limit' => 7));$posts = $pager->items?>
                 <ul class="news list right">
