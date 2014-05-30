@@ -64,6 +64,16 @@ class CommentManager extends BaseModel
         return true;
     }
 
+    function findComments()
+    {
+        $phql = 'SELECT * FROM Eva\EvaComment\Entities\Comments AS c ORDER BY c.createdAt DESC';
+
+        $manager = $this->getModelsManager();
+        $comments = $manager->createQuery($phql);
+
+        return $comments;
+    }
+
     function findCommentById($id)
     {
         $comment = Comments::findFirstById($id);

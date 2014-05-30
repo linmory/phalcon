@@ -35,7 +35,7 @@ class CommentController extends ControllerBase
         $comments = $commentManager->findComments();
 
         $paginator = new \Eva\EvaEngine\Paginator(array(
-            "data" => $comments,
+            "builder" => $comments,
             "limit"=> $limit,
             "page" => $query['page']
         ));

@@ -133,7 +133,7 @@ class Comments extends BaseModel
             '\Eva\EvaComment\Entities\Threads',
             'id',
             array(
-                'alias' => 'Thread',
+                'alias' => 'thread',
                 'foreignKey' => true
             )
         );
