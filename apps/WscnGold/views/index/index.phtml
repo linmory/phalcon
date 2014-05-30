@@ -106,10 +106,9 @@
                         <script type="text/template" data-rtq-template>
                             <div data-trend="<%= trend %>">
                                 <span class="update-time"><%= updateTime %></span>
-                                <h3 class="title">
-                                    <a href="/techanalysis/<%= symbol %>"><%= title %></a>：
-                                    <span class="price"><%= price %></span>
-                                </h3>
+                                <a class="title" href="/techanalysis/<%= symbol %>">
+                                    <%= title %>：<span class="price"><%= price %></span>
+                                </a>
                                 <span class="close-price">昨收：<%= prevClose %></span>
                                 <span class="open-price">今开：<%= open %></span>
                             </div>
@@ -139,7 +138,7 @@
                                 <% sell = (sell * 100 / sum).toFixed(2) + '%'; %>
                                 <% var advice = data.summary.conclusion.action; %>
                                 <% var adviceClass = '' ; %>
-                                <% if (advice.indexOf('买') > -1) {adviceClass = 'text-green';} else if (advice.indexOf('卖') > -1) {adviceClass = 'text-red';}%>
+                                <% if (advice.indexOf('买') > -1) {adviceClass = 'text-red';} else if (advice.indexOf('卖') > -1) {adviceClass = 'text-green';}%>
                                 <table class="table">
                                     <thead>
                                     <tr>
@@ -172,10 +171,10 @@
                                             <a href="/techanalysis/<%= symbol %>">移动平均指数：</a>
                                         </td>
                                         <td class="cell2">
-                                            <span class="text-green">买入</span><span class="value">(<%= data.summary.datas.MovingAverages.buy %>)</span>
+                                            <a href="/techanalysis/<%= symbol %>" class="text-red">买入</a><span class="value">(<%= data.summary.datas.MovingAverages.buy %>)</span>
                                         </td>
                                         <td class="cell2">
-                                            <span class="text-red">卖出</span><span class="value">(<%= data.summary.datas.MovingAverages.sell %>)</span>
+                                            <a href="/techanalysis/<%= symbol %>" class="text-green">卖出</a><span class="value">(<%= data.summary.datas.MovingAverages.sell %>)</span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -183,16 +182,16 @@
                                             <a href="/techanalysis/<%= symbol %>">指标：</a>
                                         </td>
                                         <td class="cell2">
-                                            <span class="text-green">买入</span><span class="value">(<%= data.summary.datas.TechnicalIndicators.buy %>)</span>
+                                            <a href="/techanalysis/<%= symbol %>" class="text-red">买入</a><span class="value">(<%= data.summary.datas.TechnicalIndicators.buy %>)</span>
                                         </td>
                                         <td class="cell2">
-                                            <span class="text-red">卖出</span><span class="value">(<%= data.summary.datas.TechnicalIndicators.sell %>)</span>
+                                            <a href="/techanalysis/<%= symbol %>" class="text-green">卖出</a><span class="value">(<%= data.summary.datas.TechnicalIndicators.sell %>)</span>
                                         </td>
                                     </tr>
                                     </tbody>
                                 </table>
                                 <div data-analysis-result>
-                                    <h3 class="advice">建议：<span class="text <%= adviceClass %>"><%= advice %></span></h3>
+                                    <a href="/techanalysis/<%= symbol %>" class="advice">建议：<span class="text <%= adviceClass %>"><%= advice %></span></a>
                                     <div class="compare">
                                         <h3 class="title">多空对比</h3>
                                         <div class="row">
@@ -247,19 +246,19 @@
                                     <tr>
                                         <td class="label">移动平均指数：</td>
                                         <td class="cell2">
-                                            <a class="link buy"  href="#">买入<span class="value">(N/A)</span></a>
+                                            <a class="link text-red"  href="#">买入<span class="value">(N/A)</span></a>
                                         </td>
                                         <td class="cell2">
-                                            <a class="link sell" href="#">卖出<span class="value">(N/A)</span></a>
+                                            <a class="link text-green" href="#">卖出<span class="value">(N/A)</span></a>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label">指标：</td>
                                         <td class="cell2">
-                                            <a class="link buy"  href="#">买入<span class="value">(N/A)</span></a>
+                                            <a class="link text-red"  href="#">买入<span class="value">(N/A)</span></a>
                                         </td>
                                         <td class="cell2">
-                                            <a class="link sell" href="#">卖出<span class="value">(N/A)</span></a>
+                                            <a class="link text-green" href="#">卖出<span class="value">(N/A)</span></a>
                                         </td>
                                     </tr>
                                     </tbody>
@@ -756,7 +755,7 @@
                             <% sell = (sell * 100 / sum).toFixed(2) + '%'; %>
                             <% var advice = data.summary.conclusion.action; %>
                             <% var adviceClass = '' ; %>
-                            <% if (advice.indexOf('买') > -1) {adviceClass = 'text-green';} else if (advice.indexOf('卖') > -1) {adviceClass = 'text-red';}%>
+                            <% if (advice.indexOf('买') > -1) {adviceClass = 'text-red';} else if (advice.indexOf('卖') > -1) {adviceClass = 'text-green';}%>
                             <div class="line type1"></div>
                             <div class="row">
                                 <div class="span">

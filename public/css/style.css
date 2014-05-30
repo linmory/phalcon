@@ -2629,6 +2629,7 @@ td.datepickerSpecial.datepickerSelected a {
 }
 #main-analysis .datum .title {
   height: auto;
+  display: block;
   margin: 0;
   border-bottom: none;
   font-size: 18px;
@@ -2712,11 +2713,11 @@ td.datepickerSpecial.datepickerSelected a {
 }
 #main-analysis .compare .indicator .bullish {
   height: 100%;
-  background-color: #4cac6d;
+  background-color: #df6c6c;
 }
 #main-analysis .compare .indicator .bearish {
   height: 100%;
-  background-color: #df6c6c;
+  background-color: #4cac6d;
 }
 #main-analysis .dash-line {
   margin: 15px 0;
@@ -3793,11 +3794,11 @@ td.datepickerSpecial.datepickerSelected a {
 }
 #stare-modal.panel .market-analysis .overview .compare .indicator .bullish {
   height: 100%;
-  background-color: #4cac6d;
+  background-color: #df6c6c;
 }
 #stare-modal.panel .market-analysis .overview .compare .indicator .bearish {
   height: 100%;
-  background-color: #df6c6c;
+  background-color: #4cac6d;
 }
 #stare-modal.panel .market-analysis .overview .advice {
   font-size: 18px;
