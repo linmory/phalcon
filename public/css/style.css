@@ -3629,7 +3629,7 @@ td.datepickerSpecial.datepickerSelected a {
 }
 #stare-modal.panel .finance-calendar.scrollable.list {
   width: 423px;
-  height: 255px;
+  height: 460px;
   margin-bottom: 20px;
   background-color: #e6e6e6;
 }
@@ -3723,6 +3723,7 @@ td.datepickerSpecial.datepickerSelected a {
   font-weight: bold;
 }
 #stare-modal.panel .market-analysis {
+  display: none;
   padding: 15px;
   width: 393px;
   height: 175px;
