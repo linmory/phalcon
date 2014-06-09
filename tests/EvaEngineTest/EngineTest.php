@@ -1,19 +1,9 @@
 <?php
-/**
- * EvaThumber
- * URL based image transformation php library
- *
- * @link      https://github.com/AlloVince/EvaThumber
- * @copyright Copyright (c) 2012-2013 AlloVince (http://avnpc.com/)
- * @license   http://framework.zend.com/license/new-bsd New BSD License
- * @author    AlloVince
- */
-
 namespace EvaEngineTest;
 
 use Eva\EvaEngine\Engine;
 
-class EvaEngine extends \PHPUnit_Framework_TestCase
+class EngineTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {

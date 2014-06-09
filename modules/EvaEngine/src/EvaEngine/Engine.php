@@ -80,60 +80,16 @@ class Engine
         return $this->application = new Application();
     }
 
-    public function loadModules(array $modules)
+    public function loadModules(array $moduleSettings)
     {
-        $moduleArray = array();
-        $modulesPath = $this->getModulesPath();
+        $moduleManager = $this->getDI()->get('moduleManager');
+        $moduleManager
+            ->setDefaultPath($this->getModulesPath())
+            ->setCachePath($this->getConfigPath())
+            ->loadModules($moduleSettings);
 
-        foreach ($modules as $key => $module) {
-            if (is_array($module)) {
-                if (!isset($module['className'])) {
-                    $module['className'] = "Eva\\$key\\Module";
-                }
-                if (!isset($module['path'])) {
-                    $module['path'] = "$modulesPath/$key/Module.php";
-                }
-                $moduleArray[$key] = $module;
-            } elseif (is_string($module)) {
-                //Only Module Name means its a Eva Standard module
-                $moduleArray[$module] = array(
-                    'className' => "Eva\\$module\\Module",
-                    'path' => "$modulesPath/$module/Module.php",
-                );
-            } else {
-                throw new \Exception('Module not load by incorrect format');
-            }
-        }
-
-        $application = $this->getApplication();
-        $application->registerModules($moduleArray);
-
-        $modules = $application->getModules();
-        $loader = new Loader();
-        $loaderArray = array();
-        foreach ($moduleArray as $module) {
-            $loaderArray[$module['className']] = $module['path'];
-        }
-        $loader->registerClasses($loaderArray)->register();
-        $loaderArray = array();
-        foreach ($moduleArray as $module) {
-            $moduleLoader = method_exists($module['className'], 'registerGlobalAutoloaders') ?
-            $module['className']::registerGlobalAutoloaders() :
-            array();
-            if ($moduleLoader instanceof $loader) {
-                continue;
-            }
-            $loaderArray += $moduleLoader;
-        }
-        if ($loaderArray) {
-            $loader->registerNamespaces($loaderArray)->register();
-        }
-
-        $di = $this->getDI();
-        $di->set('moduleManager', function () use ($moduleArray) {
-            return new ModuleManager($moduleArray);
-        });
-
+        $this->getApplication()->registerModules($moduleManager->getModules());
+        $this->getDI()->set('moduleManager', $moduleManager);
         return $this;
     }
 
@@ -152,18 +108,17 @@ class Engine
         $di = new FactoryDefault();
         $self = $this;
 
-        /*
-        $di->set('app', function () use ($self) {
-            return $self->getApplication();
-        });
-        */
-
         //call loadmodules will overwrite this
         $di->set('moduleManager', function () {
             return new ModuleManager();
         });
 
         $di->set('config', function () use ($di, $self) {
+            $cacheFile = $self->getConfigPath() . "/_cache.config.php";
+            if(file_exists($cacheFile) && $cache = include($cacheFile)) {
+                return new Config($cache);
+            }
+
             $config = new Config();
 
             //merge all loaded module configs
@@ -187,6 +142,11 @@ class Engine
                 return $config;
             }
             $config->merge(new Config(include $self->getConfigPath() . "/config.local.php"));
+
+            if($cacheFile && $fh = fopen($cacheFile, 'w')) {
+                fwrite($fh, '<?php return ' . var_export($config->toArray(), true) . ';');
+                fclose($fh);
+            }
             return $config;
         });
 
