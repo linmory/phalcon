@@ -21,6 +21,8 @@ class Engine
 {
     protected $appRoot;
 
+    protected $appName; //for cache prefix
+
     protected $modulesPath;
 
     protected $di;
@@ -40,6 +42,17 @@ class Engine
     public function getAppRoot()
     {
         return $this->appRoot;
+    }
+
+    public function setAppName($name)
+    {
+        $this->appName = $name;
+        return $this;
+    }
+
+    public function getAppName()
+    {
+        return $this->appName;
     }
 
     public function setConfigPath($path)
@@ -86,7 +99,7 @@ class Engine
         $moduleManager
             ->setDefaultPath($this->getModulesPath())
             ->setCachePath($this->getConfigPath())
-            ->loadModules($moduleSettings);
+            ->loadModules($moduleSettings, $this->getAppName());
 
         $this->getApplication()->registerModules($moduleManager->getModules());
         $this->getDI()->set('moduleManager', $moduleManager);
@@ -114,7 +127,8 @@ class Engine
         });
 
         $di->set('config', function () use ($di, $self) {
-            $cacheFile = $self->getConfigPath() . "/_cache.config.php";
+            $cachePrefix = $self->getAppName();
+            $cacheFile = $self->getConfigPath() . "/_cache.$cachePrefix.config.php";
             if(file_exists($cacheFile) && $cache = include($cacheFile)) {
                 return new Config($cache);
             }
@@ -559,9 +573,10 @@ class Engine
 
 
 
-    public function __construct($appRoot = null)
+    public function __construct($appRoot = null, $appName = 'evaengine')
     {
         $this->appRoot = $appRoot ? $appRoot : __DIR__;
+        $this->appName = $appName;
     }
 
 }

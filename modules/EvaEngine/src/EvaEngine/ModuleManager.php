@@ -62,10 +62,10 @@ class ModuleManager
         return $this->eventsManager = $eventsManager;
     }
 
-    public function loadModules(array $moduleSettings)
+    public function loadModules(array $moduleSettings, $cachePrefix = 'default')
     {
         $cachePath = $this->getCachePath();
-        $cacheFile = $cachePath ? $cachePath . '/_cache.module.php' : '';
+        $cacheFile = $cachePath ? $cachePath . "/_cache.$cachePrefix.module.php" : '';
         $loader = $this->getLoader();
 
         if(file_exists($cacheFile) && $cache = include($cacheFile)) {
