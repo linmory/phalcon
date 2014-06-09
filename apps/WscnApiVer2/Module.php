@@ -36,7 +36,7 @@ class Module implements ModuleDefinitionInterface
             return $dispatcher;
         };
 
-        ErrorHandler::setErrorController('JsonError');
+        ErrorHandler::setErrorController('Jsonerror');
     }
 
 }
