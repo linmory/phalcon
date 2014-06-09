@@ -29,10 +29,22 @@ class Engine
 
     protected $configPath;
 
+    protected $cacheEnable = false;
+
+    public function setAppRoot($appRoot)
+    {
+        $this->appRoot = $appRoot;
+        return $this;
+    }
+
+    public function getAppRoot()
+    {
+        return $this->appRoot;
+    }
+
     public function setConfigPath($path)
     {
         $this->configPath = $path;
-
         return $this;
     }
 
@@ -41,21 +53,22 @@ class Engine
         if ($this->configPath) {
             return $this->configPath;
         }
-
         return $this->configPath = $this->appRoot . '/config';
     }
 
-    public function initErrorHandler(Error\ErrorHandlerInterface $errorHandler)
-    {
-        if($this->getDI()->get('config')->debug) {
-            return $this;
-        }
 
-        $errorClass = get_class($errorHandler);
-        set_error_handler("$errorClass::errorHandler");
-        set_exception_handler("$errorClass::exceptionHandler");
-        register_shutdown_function("$errorClass::shutdownHandler");
+    public function setModulesPath($modulesPath)
+    {
+        $this->modulesPath = $modulesPath;
         return $this;
+    }
+
+    public function getModulesPath()
+    {
+        if ($this->modulesPath) {
+            return $this->modulesPath;
+        }
+        return $this->modulesPath = $this->appRoot . '/modules';
     }
 
     public function getApplication()
@@ -67,6 +80,69 @@ class Engine
         return $this->application = new Application();
     }
 
+    public function loadModules(array $modules)
+    {
+        $moduleArray = array();
+        $modulesPath = $this->getModulesPath();
+
+        foreach ($modules as $key => $module) {
+            if (is_array($module)) {
+                if (!isset($module['className'])) {
+                    $module['className'] = "Eva\\$key\\Module";
+                }
+                if (!isset($module['path'])) {
+                    $module['path'] = "$modulesPath/$key/Module.php";
+                }
+                $moduleArray[$key] = $module;
+            } elseif (is_string($module)) {
+                //Only Module Name means its a Eva Standard module
+                $moduleArray[$module] = array(
+                    'className' => "Eva\\$module\\Module",
+                    'path' => "$modulesPath/$module/Module.php",
+                );
+            } else {
+                throw new \Exception('Module not load by incorrect format');
+            }
+        }
+
+        $application = $this->getApplication();
+        $application->registerModules($moduleArray);
+
+        $modules = $application->getModules();
+        $loader = new Loader();
+        $loaderArray = array();
+        foreach ($moduleArray as $module) {
+            $loaderArray[$module['className']] = $module['path'];
+        }
+        $loader->registerClasses($loaderArray)->register();
+        $loaderArray = array();
+        foreach ($moduleArray as $module) {
+            $moduleLoader = method_exists($module['className'], 'registerGlobalAutoloaders') ?
+            $module['className']::registerGlobalAutoloaders() :
+            array();
+            if ($moduleLoader instanceof $loader) {
+                continue;
+            }
+            $loaderArray += $moduleLoader;
+        }
+        if ($loaderArray) {
+            $loader->registerNamespaces($loaderArray)->register();
+        }
+
+        $di = $this->getDI();
+        $di->set('moduleManager', function () use ($moduleArray) {
+            return new ModuleManager($moduleArray);
+        });
+
+        return $this;
+    }
+
+    public function setDI(\Phalcon\DiInterface $di)
+    {
+        $this->di = $di;
+        return $this;
+    }
+
     public function getDI()
     {
         if ($this->di) {
@@ -76,9 +152,11 @@ class Engine
         $di = new FactoryDefault();
         $self = $this;
 
+        /*
         $di->set('app', function () use ($self) {
             return $self->getApplication();
         });
+        */
 
         //call loadmodules will overwrite this
         $di->set('moduleManager', function () {
@@ -89,10 +167,10 @@ class Engine
             $config = new Config();
 
             //merge all loaded module configs
-            $modules = $di->get('moduleManager');
-            if ($modules && $modulesArray = $modules->getModules()) {
-                foreach ($modulesArray as $moduleName => $module) {
-                    $moduleConfig = $modules->getModuleConfig($moduleName);
+            $moduleManager = $di->get('moduleManager');
+            if ($moduleManager && $modules = $moduleManager->getModules()) {
+                foreach ($modules as $moduleName => $module) {
+                    $moduleConfig = $moduleManager->getModuleConfig($moduleName);
                     if ($moduleConfig instanceof Config) {
                         $config->merge($moduleConfig);
                     } else {
@@ -109,7 +187,6 @@ class Engine
                 return $config;
             }
             $config->merge(new Config(include $self->getConfigPath() . "/config.local.php"));
-
             return $config;
         });
 
@@ -140,7 +217,6 @@ class Engine
                     $router->add($url, $route);
                 }
             }
-
             return $router;
         });
 
@@ -314,7 +390,6 @@ class Engine
 
         $di->set('tag', function () use ($di) {
             \Eva\EvaEngine\Tag::setDi($di);
-
             return new \Eva\EvaEngine\Tag();
         });
 
@@ -335,43 +410,10 @@ class Engine
             return $metaData;
         });
 
-        /*
-        $di->set('db', function () use ($di) {
-            $config = $di->get('config');
-            $dbAdapter = new DbAdapter(array(
-                'host' => $config->dbAdapter->master->host,
-                'username' => $config->dbAdapter->master->username,
-                'password' => $config->dbAdapter->master->password,
-                'dbname' => $config->dbAdapter->master->database,
-                'charset' => 'utf8',
-            ));
-            $eventsManager = new EventsManager();
-            $logger = new FileLogger($config->logger->path . date('Y-m-d') . '.log');
-            $eventsManager->attach('db', function ($event, $dbAdapter) use ($logger) {
-                if ($event->getType() == 'beforeQuery') {
-                    $sqlVariables = $dbAdapter->getSQLVariables();
-                    if (count($sqlVariables)) {
-                        $query = str_replace(array('%', '?'), array('%%', "'%s'"), $dbAdapter->getSQLStatement());
-                        $query = vsprintf($query, $sqlVariables);
-                        //
-                        $logger->log($query, \Phalcon\Logger::INFO);
-                    } else {
-                        $logger->log($dbAdapter->getSQLStatement(), \Phalcon\Logger::INFO);
-                    }
-                }
-            });
-
-            $dbAdapter->setEventsManager($eventsManager);
-
-            return $dbAdapter;
-        });
-        */
-
         $di->set('dispatcher', function () use ($di) {
             $eventsManager = $di->get('eventsManager');
             $dispatcher = new Dispatcher();
             $dispatcher->setEventsManager($eventsManager);
-
             return $dispatcher;
         }, true);
 
@@ -466,78 +508,6 @@ class Engine
         return $this->di = $di;
     }
 
-    public function setModulesPath($modulesPath)
-    {
-        $this->modulesPath = $modulesPath;
-
-        return $this;
-    }
-
-    public function getModulesPath()
-    {
-        if ($this->modulesPath) {
-            return $this->modulesPath;
-        }
-
-        return $this->modulesPath = $this->appRoot . '/modules';
-    }
-
-    public function loadModules(array $modules)
-    {
-        $moduleArray = array();
-        $modulesPath = $this->getModulesPath();
-
-        foreach ($modules as $key => $module) {
-            if (is_array($module)) {
-                if (!isset($module['className'])) {
-                    $module['className'] = "Eva\\$key\\Module";
-                }
-                if (!isset($module['path'])) {
-                    $module['path'] = "$modulesPath/$key/Module.php";
-                }
-                $moduleArray[$key] = $module;
-            } elseif (is_string($module)) {
-                //Only Module Name means its a Eva Standard module
-                $moduleArray[$module] = array(
-                    'className' => "Eva\\$module\\Module",
-                    'path' => "$modulesPath/$module/Module.php",
-                );
-            } else {
-                throw new \Exception('Module not load by incorrect format');
-            }
-        }
-
-        $application = $this->getApplication();
-        $application->registerModules($moduleArray);
-
-        $modules = $application->getModules();
-        $loader = new Loader();
-        $loaderArray = array();
-        foreach ($moduleArray as $module) {
-            $loaderArray[$module['className']] = $module['path'];
-        }
-        $loader->registerClasses($loaderArray)->register();
-        $loaderArray = array();
-        foreach ($moduleArray as $module) {
-            $moduleLoader = method_exists($module['className'], 'registerGlobalAutoloaders') ?
-            $module['className']::registerGlobalAutoloaders() :
-            array();
-            if ($moduleLoader instanceof $loader) {
-                continue;
-            }
-            $loaderArray += $moduleLoader;
-        }
-        if ($loaderArray) {
-            $loader->registerNamespaces($loaderArray)->register();
-        }
-
-        $di = $this->getDI();
-        $di->set('moduleManager', function () use ($moduleArray) {
-            return new ModuleManager($moduleArray);
-        });
-
-        return $this;
-    }
 
     public function bootstrap()
     {
@@ -547,6 +517,36 @@ class Engine
 
         return $this;
     }
+
+    public function run()
+    {
+        $di = $this->getDI();
+
+        $debug = $di->get('config')->debug;
+        if ($debug) {
+            $debugger = new \Phalcon\Debug();
+            $debugger->debugVar($this->getApplication()->getModules(), 'modules');
+            $debugger->listen(true, true);
+        }
+
+        $response = $this->getApplication()->handle();
+        echo $response->getContent();
+    }
+
+    public function initErrorHandler(Error\ErrorHandlerInterface $errorHandler)
+    {
+        if($this->getDI()->get('config')->debug) {
+            return $this;
+        }
+
+        $errorClass = get_class($errorHandler);
+        set_error_handler("$errorClass::errorHandler");
+        set_exception_handler("$errorClass::exceptionHandler");
+        register_shutdown_function("$errorClass::shutdownHandler");
+        return $this;
+    }
+
+
 
     public function runCustom()
     {
@@ -597,20 +597,7 @@ class Engine
         echo $response->getContent();
     }
 
-    public function run()
-    {
-        $di = $this->getDI();
 
-        $debug = $di->get('config')->debug;
-        if ($debug) {
-            $debugger = new \Phalcon\Debug();
-            $debugger->debugVar($this->getApplication()->getModules(), 'modules');
-            $debugger->listen(true, true);
-        }
-
-        $response = $this->getApplication()->handle();
-        echo $response->getContent();
-    }
 
     public function __construct($appRoot = null)
     {
