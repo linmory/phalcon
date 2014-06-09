@@ -16,7 +16,9 @@
         this.scrollable = options.scrollable === false ? false : true;
         this.updateUrl = options.updateUrl || 'http://api.wallstreetcn.com/apiv1/livenews.jsonp';
         this.countUrl = options.countUrl;
-        this.url = options.url || 'http://api.wallstreetcn.com/apiv1/livenews-list-v2.jsonp';
+        //
+        //this.url = options.url || 'http://api.wallstreetcn.com/apiv1/livenews-list-v2.jsonp';
+        this.url = options.url || 'http://api.wallstreetcn.com/apiv1/livenews-list-v2.jsonp?tid[]=9497&tid[]=9495';
         this.baseUpdateUrl = this.updateUrl;
         this.baseCountUrl = this.countUrl;
         this.baseUrl = this.url;

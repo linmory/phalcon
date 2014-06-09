@@ -391,7 +391,9 @@ $(function(){
     });
 
     //
-    $('#side-fcl').fcl();
+    $('#side-fcl').fcl({
+        refreshPrice: true
+    });
     //
     $('#finance-calendar').fcl({
         scrollable: false,
@@ -484,6 +486,7 @@ $(function(){
     */
     var $modal = $('#modal');
     var $stare = $('#stare-modal');
+    var $userName = $('#comment-username-modal');
 
     function hideModal() {
         //todo
@@ -501,6 +504,7 @@ $(function(){
         });
         $('#stare-fcl').fcl({
             autoScroll: true,
+            refreshPrice: true,
             heightChange: true
         });
         document.getElementById('stare-iframe').src = $('#stare-iframe').attr('data-src');
@@ -560,4 +564,36 @@ $(function(){
     $('#stare-modal>.close').click(function(){
         hideModal();
     });
+
+    /**
+     * 用户评论
+     */
+    function hiedUsernameModal() {
+        $userName.find('textarea').val('');
+        $userName.find('[name=username]').val('');
+        hideModal();
+    }
+    $(document).on('click', '.user-comments form.fos_comment_comment_new_form > [type=submit]', function(e){
+
+        var comment = $(this).parent().find('textarea').val();
+        if (comment) {
+            $userName.find('textarea').val(comment);
+            $modal.show(0, function(){
+                $userName.addClass('active');
+            });
+        }
+        e.preventDefault();
+    });
+    $userName.on('click', '[data-action=close]', function(e){
+        hiedUsernameModal();
+    });
+    $userName.on('click', '[type=submit]', function(e){
+        var username = $userName.find('[name=username]').val();
+        if (username) {
+            hiedUsernameModal();
+        } else {
+            e.preventDefault();
+        }
+    });
+
 });

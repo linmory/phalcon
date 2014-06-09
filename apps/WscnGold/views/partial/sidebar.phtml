@@ -25,7 +25,7 @@
             <% if (i == 0 || record.date.charAt(9) != records[i-1].date.charAt(9)) { %>
             <li class="date" data-date="<%= record.date %>"><%= record.date %></li>
             <% } %>
-            <li id="<%= record.id %>" class="item" data-trend="<%= record.trend %>" data-utm="<%= record.utm %>">
+            <li id="<%= record.id %>" class="item" data-cid="<%= record.cid %>" data-trend="<%= record.trend %>" data-utm="<%= record.utm %>">
                 <div class="row">
                     <div class="span3 meta">
                         <span class="time"><%= record.time %></span>
