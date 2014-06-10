@@ -12,6 +12,37 @@ function getSuggestClass($input) {
         return 'text-gray';
     }
 }
+function trans($input) {
+    $input = trim($input);
+    $mapping = array(
+        'Classic' => '经典',
+        'Fibonacci' => '斐波那契',
+        'Camarilla' => '卡玛利拉',
+        'Woodies' => '伍迪',
+        'DeMarks' => '德马克',
+        /*
+        'RSI(14)' => '经典',
+        'STOCH(9,6)' => '经典',
+        'STOCHRSI(14)' => '经典',
+        'MACD(12,26)' => '经典',
+        'ADX(14)' => '经典',
+        'Williams %R' => '经典',
+        'CCI(14)' => '经典',
+        'ATR(14)' => '经典',
+        'Highs/Lows(14)' => '经典',
+        'Ultimate Oscillator' => '经典',
+        'ROC' => '经典',
+        'Bull/Bear Power(13)' => '经典',
+        */
+        'MA5' => '5周期移动平均值',
+        'MA10' => '10周期移动平均值',
+        'MA20' => '20周期移动平均值',
+        'MA50' => '50周期移动平均值',
+        'MA100' => '100周期移动平均值',
+        'MA200' => '200周期移动平均值',
+    );
+    return isset($mapping[$input]) ? $mapping[$input] : $input;
+}
 ?>
 <div class="row relative">
     <div class="span8">
@@ -122,7 +153,7 @@ function getSuggestClass($input) {
                             </tr>
                             <?foreach($data['pivotPoints']['datas'] as $point):?>
                             <tr>
-                                <td class="text-gray"><?=$point['name']?></td>
+                                <td class="text-gray"><?=trans($point['name'])?></td>
                                 <td class="width-50 text-right"><?=$point['s1']?></td>
                                 <td class="width-50 text-right"><?=$point['s2']?></td>
                                 <td class="width-50 text-right"><?=$point['s3']?></td>
@@ -194,7 +225,7 @@ function getSuggestClass($input) {
                                     </tr>
                                     <?foreach($data['movingAverages']['datas'] as $point):?>
                                     <tr>
-                                        <td><?=$point['period']?></td>
+                                        <td><?=trans($point['period'])?></td>
                                         <td class="width-50 text-right">
                                             <div><?=$point['simpleValue']?></div>
                                             <div class="<?=getSuggestClass($point['simpleAction'])?>"><?=$point['simpleAction']?></div>
