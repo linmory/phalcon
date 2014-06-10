@@ -16,6 +16,8 @@
         this.id = this.$target.attr('id') || 'fcl' + FCL_INDEX ++;
         this.itemIndex = 1;
         this.$clock = this.$target.find('.clock');
+        this.refresh_price_param = '';
+        this.refresh_price_interval = null;
         this.config = {};
         this.config.timeFormat = options.timeFormat || 'HH:mm';
         this.config.dateFormat = options.dateFormat || 'YYYY年MM月DD日 dddd';
@@ -35,6 +37,8 @@
             this.$more = this.$target.find('.more');
         }
         this.config.sort = options.sort;
+        //只保留 财经事件
+        this.config.filter = options.filter;
         this.config.scrollable = options.scrollable === false ? false : true;
 
         this.init(options);
@@ -72,6 +76,8 @@
         }
         if (this.config.refreshPrice) {
             fns.push('toRefreshPrice');
+            //todo
+            setInterval(_.bind(root.doRefreshPrice, root), 10000);
         }
         if (fns.length) {
             this.getData(start, end, _.bind(function(fns) {
@@ -271,13 +277,10 @@
             var $first = $('#' + itemId);
             var $all = this.$target.find('.item[data-utm=' + $first.attr('data-utm') + ']');
             var i;
-            var param = $first.attr('data-cid');
             var l = $all.length;
-            for (i=1;i<l;i++) {
-                param += '_' + $($all[i]).attr('data-cid');
+            for (i=0; i<l; i++) {
+                this.refresh_price_param += '_' + $($all[i]).attr('data-cid');
             }
-            //todo
-            this.doRefreshPrice(param);
             var $last = $($all[l-1]);
             var $next = $last.next('.item');
             if ($next && $next.length) {
@@ -379,11 +382,14 @@
         }
         this.getData(start, end);
     };
-    Fcl.prototype.doRefreshPrice = function(param) {
+    Fcl.prototype.doRefreshPrice = function() {
+        if (! (this.refresh_price_param && this.config.refreshPrice)) {
+            return;
+        }
         var root = this;
         var $target = this.$target;
         $.ajax({
-            url: 'http://api.markets.wallstreetcn.com/v1/calendar_item_values.json?id=' + param,
+            url: 'http://api.markets.wallstreetcn.com/v1/calendar_item_values.json?id=' + this.refresh_price_param.substring(1),
             dataType: apiType,
             success: function(response) {
                 var results = response['results'];
@@ -391,9 +397,9 @@
                     var l = results.length;
                     while(l--) {
                         var id = results[l].id;
-                        var forecast = results[l].forecast;
-                        var actual = results[l].actual;
-                        var previous = results[l].previous;
+                        var forecast = results[l].forecast.trim();
+                        var actual = results[l].actual.trim();
+                        var previous = results[l].previous.trim();
                         var trend = '';
                         if (actual) {
                             if (forecast) {
@@ -412,14 +418,13 @@
                                     }
                                 }
                             }
-                        } else {
-                            actual = '- -';
+                            var $item = $target.find('.item[data-cid=' + id + ']');
+                            $item.attr('data-trend', trend);
+                            $item.find('.actual .value').html(actual);
+                            $item.find('.forecast .value').html(forecast);
+                            $item.find('.previous .value').html(previous);
+                            this.refresh_price_param.replace('_' + id, '');
                         }
-                        var $item = $target.find('.item[data-cid=' + id + ']');
-                        $item.attr('data-trend', trend);
-                        $item.find('.actual .value').text(actual);
-                        $item.find('.forecast .value').text(forecast);
-                        $item.find('.previous .value').text(previous);
                     }
                 }
             }
@@ -588,6 +593,10 @@
                     case 'VN':
                         data[4].push(result);
                         break;
+                }
+            } else if (this.config.filter) {
+                if (new RegExp(this.config.filter, 'i').test(result['calendarType'])) {
+                    data.push(result);
                 }
             } else {
                 data.push(result);
