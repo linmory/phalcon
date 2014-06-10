@@ -5,7 +5,6 @@ namespace Eva\EvaEngine;
 use Phalcon\Mvc\Router;
 use Phalcon\Mvc\Url as UrlResolver;
 use Phalcon\DI\FactoryDefault;
-use Phalcon\Session\Adapter\Files as SessionAdapter;
 use Phalcon\Config;
 use Phalcon\Loader;
 use Phalcon\Mvc\Application;
@@ -167,10 +166,8 @@ class Engine
             return $dispatcher;
         }, true);
 
-        $di->set('modelsMetadata', function () use ($di) {
-            $config = $di->getConfig();
-            $metaData = new \Phalcon\Mvc\Model\Metadata\Files($config->modelsMetadata->options->toArray());
-            return $metaData;
+        $di->set('modelsMetadata', function () use ($self) {
+            return $this->diModelsMetaData();
         });
 
         $di->set('modelsManager', function () use ($di) {
@@ -393,6 +390,31 @@ class Engine
         return $router;
     }
 
+    public function diModelsMetaData()
+    {
+        $adapterMapping = array(
+            'apc' => 'Phalcon\Mvc\Model\MetaData\Apc',
+            'files' => 'Phalcon\Mvc\Model\MetaData\Files',
+            'memory' => 'Phalcon\Mvc\Model\MetaData\Memory',
+            'xcache' => 'Phalcon\Mvc\Model\MetaData\Xcache',
+            'memcache' => 'Phalcon\Mvc\Model\MetaData\Memcache',
+            'redis' => 'Phalcon\Mvc\Model\MetaData\Redis',
+            'wincache' => 'Phalcon\Mvc\Model\MetaData\Wincache',
+        );
+
+        $config = $this->getDI()->getConfig();
+        if(!$config->modelsMetadata->enable) {
+            return new \Phalcon\Mvc\Model\MetaData\Memory();
+        }
+
+        $adapterKey = strtolower($config->modelsMetadata->adapter);
+        if(!isset($adapterMapping[$adapterKey])) {
+            throw new Exception\InvalidArgumentException(sprintf('No metadata adapter found by %s', $adapterKey));
+        }
+        $adapterClass = $adapterMapping[$adapterKey];
+        return new $adapterClass($config->modelsMetadata->options->toArray());
+    }
+
     public function diDbMaster()
     {
         $config = $this->getDI()->getConfig();
@@ -548,7 +570,7 @@ class Engine
         );
 
         $config = $this->getDI()->getConfig();
-        $adapterKey = $config->session->adapter;
+        $adapterKey = strtolower($config->session->adapter);
         if(!isset($adapterMapping[$adapterKey])) {
             throw new Exception\InvalidArgumentException(sprintf('No session adapter found by %s', $adapterKey));
         }
