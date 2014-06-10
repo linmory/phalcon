@@ -386,6 +386,7 @@
         if (! (this.refresh_price_param && this.config.refreshPrice)) {
             return;
         }
+        console.log('refresh these item [ ' + this.refresh_price_param +  ' ] price');
         var root = this;
         var $target = this.$target;
         $.ajax({
@@ -423,7 +424,7 @@
                             $item.find('.actual .value').html(actual);
                             $item.find('.forecast .value').html(forecast);
                             $item.find('.previous .value').html(previous);
-                            root.refresh_price_param.replace('_' + id, '');
+                            root.refresh_price_param = root.refresh_price_param.replace('_' + id, '');
                         }
                     }
                 }
