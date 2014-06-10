@@ -141,12 +141,14 @@ class ThreadController extends ControllerBase
         $parentId = $this->request->getQuery('parentId');
         $parent = $this->getValidCommentParent($thread, $parentId);
 
-        $content = $this->request->getPost("content");
+        $content = $this->request->getPost('content');
+        $username = $this->request->getPost('username');
         $commentManager = new CommentManager();
         $comment = $commentManager->createComment($thread, $parent);
 
 //        if ($form->isValid()) {
         $comment->content = $content;
+        if(!empty($username)) $comment->username = $username;
 
         if ($commentManager->saveComment($comment) !== false) {
             $errors = $comment->getMessages();
