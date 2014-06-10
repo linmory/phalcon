@@ -325,6 +325,8 @@ class Post extends Entities\Posts
             return '';
         }
 
+        return $this->image;
+        /*
         if ($this->image) {
             if(
                 \Phalcon\Text::startsWith($this->image, 'http://', false) ||
@@ -333,10 +335,9 @@ class Post extends Entities\Posts
                 return $this->image;
             }
         }
-
         $staticUri = $this->getDI()->get('config')->filesystem->staticUri;
         $staticPath = $this->getDI()->get('config')->filesystem->staticPath;
-
         return $staticUri . $staticPath . $this->image;
+        */
     }
 }

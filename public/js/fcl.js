@@ -20,6 +20,7 @@
         this.config.timeFormat = options.timeFormat || 'HH:mm';
         this.config.dateFormat = options.dateFormat || 'YYYY年MM月DD日 dddd';
         this.config.autoScroll = options.autoScroll;
+        this.config.refreshPrice = options.refreshPrice;
         this.config.datepicker = options.datepicker;
         if (this.config.datepicker) {
             this.$datepicker = this.$target.find('[data-picker]');
@@ -65,8 +66,20 @@
         var root = this;
         var start = moment().format('YYYY-MM-DD');
         var end   = moment().add('days', 1).format('YYYY-MM-DD');
-        if (options.autoScroll) {
-            this.getData(start, end, _.bind(this.autoScroll, this));
+        var fns = [];
+        if (this.config.autoScroll) {
+            fns.push('autoScroll');
+        }
+        if (this.config.refreshPrice) {
+            fns.push('toRefreshPrice');
+        }
+        if (fns.length) {
+            this.getData(start, end, _.bind(function(fns) {
+                var l = fns.length;
+                while(l--) {
+                    this[fns[l]]();
+                }
+            }, root, fns));
         } else {
             this.getData(start, end);
         }
@@ -250,6 +263,44 @@
             this.nextDay();
         }
     };
+    Fcl.prototype.toRefreshPrice = function(itemId) {
+        if (! this.config.refreshPrice) {
+            return;
+        }
+        if (itemId) {
+            var $first = $('#' + itemId);
+            var $all = this.$target.find('.item[data-utm=' + $first.attr('data-utm') + ']');
+            var i;
+            var param = $first.attr('data-cid');
+            var l = $all.length;
+            for (i=1;i<l;i++) {
+                param += '_' + $($all[i]).attr('data-cid');
+            }
+            //todo
+            this.doRefreshPrice(param);
+            var $last = $($all[l-1]);
+            var $next = $last.next('.item');
+            if ($next && $next.length) {
+                setTimeout(_.bind(this.toRefreshPrice, this, $next.attr('id')), $next.attr('data-utm') * 1000 - new Date().getTime());
+            }
+        } else {
+            var $items = this.$target.find('.item');
+            if ($items && $items.length) {
+                var i;
+                var l = $items.length;
+                var item;
+                var time;
+                for (i = 0; i < l; i ++) {
+                    item = $items[i];
+                    time = $(item).attr('data-utm') * 1000 - new Date().getTime();
+                    if (time > 0) {
+                        setTimeout(_.bind(this.toRefreshPrice, this, item.id), time);
+                        break;
+                    }
+                }
+            }
+        }
+    }
     Fcl.prototype.autoScroll = function(arg) {
 
         if (this.timerInterval) {
@@ -327,6 +378,52 @@
                 this.$calendar.slideUp();
         }
         this.getData(start, end);
+    };
+    Fcl.prototype.doRefreshPrice = function(param) {
+        var root = this;
+        var $target = this.$target;
+        $.ajax({
+            url: 'http://api.markets.wallstreetcn.com/v1/calendar_item_values.json?id=' + param,
+            dataType: apiType,
+            success: function(response) {
+                var results = response['results'];
+                if (results && results.length) {
+                    var l = results.length;
+                    while(l--) {
+                        var id = results[l].id;
+                        var forecast = results[l].forecast;
+                        var actual = results[l].actual;
+                        var previous = results[l].previous;
+                        var trend = '';
+                        if (actual) {
+                            if (forecast) {
+                                if (parseFloat(actual) > parseFloat(forecast)) {
+                                    trend = 'up';
+                                } else if (parseFloat(actual) < parseFloat(forecast)) {
+                                    trend = 'down';
+                                }
+                            } else {
+                                forecast = '- -';
+                                if (previous) {
+                                    if (parseFloat(actual) > parseFloat(previous)) {
+                                        trend = 'up';
+                                    } else if (parseFloat(actual) < parseFloat(previous)) {
+                                        trend = 'down';
+                                    }
+                                }
+                            }
+                        } else {
+                            actual = '- -';
+                        }
+                        var $item = $target.find('.item[data-cid=' + id + ']');
+                        $item.attr('data-trend', trend);
+                        $item.find('.actual .value').text(actual);
+                        $item.find('.forecast .value').text(forecast);
+                        $item.find('.previous .value').text(previous);
+                    }
+                }
+            }
+        });
     };
     Fcl.prototype.getData = function(start, end, arg) {
 
@@ -420,6 +517,7 @@
         //var record = {};
         for (i=0; i<l; i++) {
             result = results[i];
+            result.cid  = result.id;
             result.id   = this.id + '-item' + this.itemIndex ++;
             var mt = moment(result['localDateTime'], 'YYYY-MM-DD hh:mm:ss');
             result.time = mt.format(root.config.timeFormat);

@@ -4,7 +4,7 @@ namespace Eva\EvaEngine\Mvc\Controller;
 
 use Phalcon\Mvc\Controller;
 
-class JsonErrorController extends Controller
+class JsonerrorController extends Controller
 {
     public function indexAction()
     {

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><?=$this->placeholder->block('title', '华尔街见闻移动版');?></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<link href="http://wallstreetcn.com/favicon.ico" rel="shortcut icon" type="image/x-icon">
+	<link rel="stylesheet" href="http://cdn.static.wallstreetcn.com/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="http://cdn.static.wallstreetcn.com/css/font-awesome.min.css" />
+	<style type="text/css">
+		.toolbar{
+			position: relative;
+			background-color: #1468a2;
+			background-image: none;
+			border: 0;
+			margin: 0;
+			padding: 0;
+			height: 34px;
+			min-height: 34px;
+			font-size: 18px;
+			font-weight: normal;
+		}
+		
+		.toolbar .home{
+			color:white;
+			left:5px;
+			font-size:22px;
+			position:absolute;
+		}
+		
+		.toolbar .title {
+			position: absolute;
+			left: 0;
+			right: 0;
+			margin: 0 auto;
+			font-size: 16px;
+			color: #fff;
+			width: 6.5em;
+			text-align: left;
+			line-height: 30px;
+			height: 34px;
+		}
+		
+		.news-info{
+			padding: 12px 15px !important;
+			-webkit-transform: translate3d(0px, 0px, 0px);
+			/*position: absolute;
+			min-width: 100%;
+			min-height: 100%;
+			height: auto!important;
+			width: auto!important;*/
+			width:100%;
+			height:100%;
+			background: #f7f7f7;
+			font-size: 16px;
+		}
+		
+		.news-info .title {
+			font-size: 20px;
+		}
+		
+		.news-info .meta {
+			position: relative;
+			font-size: 12px;
+			line-height: 24px;
+			padding-bottom: 6px;
+			color: #999;
+			border-bottom: 1px solid #999;
+			margin: 10px 0;
+		}
+		
+		.news-info .content {
+			line-height: 1.5;
+			margin-bottom: 20px;
+		}
+		
+		.news-info .content img {
+			max-width: 100%!important;
+			height: auto!important;
+		}
+
+        .news-info .meta>.item {
+                margin-right: 1em;
+        }
+    </style>
+
+</head>
+<body>
+
+<div style="width: 100% !important; height: 100% !important;">
+	<div class="toolbar">
+        <a href="http://wallstreetcn.com/"><div class="home"><i class="icon-home"></i></div></a>
+		<div class="title"><img src="/wscnwap/logo.png" /></div>
+	</div>
+    <?=$this->getContent()?>
+
+<script src="http://cdn.static.wallstreetcn.com/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-19303398-2']);
+		_gaq.push(['_setDomainName', '.wallstreetcn.com']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>    
+	<script>
+		var _hmt = _hmt || [];
+		(function() {
+			var hm = document.createElement("script");
+			hm.src = "//hm.baidu.com/hm.js?c9477ef9d8ebaa27c94f86cc3f505fa5";
+			var s = document.getElementsByTagName("script")[0]; 
+			s.parentNode.insertBefore(hm, s);
+		})();
+	</script>
+</body>
+</html>
+

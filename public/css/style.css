@@ -714,7 +714,7 @@ label.checkbox.right {
 .market.chart > .titlebar > .button[data-toggle=stare-modal] {
   display: block;
   float: right;
-  width: 90px;
+  width: 75px;
   height: 25px;
   line-height: 25px;
   text-align: center;
@@ -1119,6 +1119,9 @@ label.checkbox.right {
 }
 .article.page sub {
   bottom: -0.25em;
+}
+.article.page strong {
+  font-weight: bold;
 }
 .article.page a:hover {
   text-decoration: underline;
@@ -2955,8 +2958,8 @@ td.datepickerSpecial.datepickerSelected a {
   color: #005178;
 }
 .tutorial.page p {
-  font-size: 18px;
-  line-height: 1.75em;
+  font-size: 17px;
+  line-height: 1.5em;
   margin-bottom: 30px;
 }
 .livenews .icon {
@@ -2987,10 +2990,10 @@ td.datepickerSpecial.datepickerSelected a {
   background-position: -120px 0;
 }
 .livenews .item.red {
-  color: #005178;
+  color: #005196;
 }
 .livenews .item.red .link {
-  color: #005178;
+  color: #005196;
 }
 .livenews .item.bold {
   font-weight: bold;
@@ -3395,27 +3398,27 @@ td.datepickerSpecial.datepickerSelected a {
   left: 0;
   right: 0;
 }
-#stare-modal.panel {
+#modal > .panel {
   display: none;
-  padding: 20px 25px;
-  width: 1150px;
-  height: 540px;
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
   margin: auto;
+}
+#modal > .panel.active {
+  display: block;
+}
+#stare-modal.panel {
+  padding: 20px 25px;
+  width: 1150px;
+  height: 540px;
   background-color: #0f0f0f;
   /*transform: scale(0, 0);
     -webkit-transform: scale(0, 0);
     transition: transform 0.75s;
     -webkit-transition: -webkit-transform 0.75s;*/
-}
-#stare-modal.panel.active {
-  display: block;
-  /*transform: scale(1, 1);
-        -webkit-transform: scale(1, 1);*/
 }
 #stare-modal.panel > .content {
   width: 100%;
@@ -3629,7 +3632,7 @@ td.datepickerSpecial.datepickerSelected a {
 }
 #stare-modal.panel .finance-calendar.scrollable.list {
   width: 423px;
-  height: 255px;
+  height: 460px;
   margin-bottom: 20px;
   background-color: #e6e6e6;
 }
@@ -3723,6 +3726,7 @@ td.datepickerSpecial.datepickerSelected a {
   font-weight: bold;
 }
 #stare-modal.panel .market-analysis {
+  display: none;
   padding: 15px;
   width: 393px;
   height: 175px;
@@ -3810,4 +3814,63 @@ td.datepickerSpecial.datepickerSelected a {
   display: block;
   font-size: 14px;
   margin-top: 7px;
+}
+#comment-username-modal {
+  width: 300px;
+  height: 200px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+#comment-username-modal .head {
+  border-radius: 5px 5px 0 0;
+  background-color: #646464;
+  color: #fff;
+  padding: 0 10px;
+  line-height: 30px;
+}
+#comment-username-modal [data-action=close] {
+  float: right;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 30px;
+}
+#comment-username-modal .content {
+  padding: 30px;
+}
+#comment-username-modal .label {
+  line-height: 2em;
+  font-size: 14px;
+  font-weight: normal;
+  color: #000;
+  margin-bottom: 20px;
+}
+#comment-username-modal form:before {
+  display: table;
+  content: '';
+  clear: both;
+}
+#comment-username-modal form:after {
+  display: table;
+  content: '';
+  clear: both;
+}
+#comment-username-modal .input {
+  border-radius: 5px;
+  border: 1px solid #666;
+  padding: 3px;
+  line-height: 22px;
+  width: 120px;
+  display: block;
+  float: left;
+}
+#comment-username-modal .submit {
+  display: block;
+  float: right;
+  color: #fff;
+  width: 80px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 5px;
+  background-color: #005178;
+  background: -webkit-gradient(linear, 0 0, 0 100%, from(#3c80a1), to(#005077));
 }

@@ -1,5 +1,6 @@
 nohup.out
 composer.lock
+config/_*
 config/config.local.php
 vendor/*
 log/*

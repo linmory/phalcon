@@ -1,0 +1,12 @@
+<?$this->placeholder->block('title')->set($this->escaper->escapeHtml($post->title))?>
+
+<div class="news-info">
+    <span class="title"> <?=$post->title?></span>
+    <div class="meta">
+        <span class="item author"><?=$post->name?></span>
+        <span class="item time"><?=$this->tag->datetime($post->created)?></span>
+    </div>
+    <div class="content">
+        <?=$post->body->und[0]->value?>
+    </div>
+</div>
