@@ -97,19 +97,3 @@
     </div>
     <?$this->partial("partial/sidebar", array())?>
 </div>
-
-<div id="modal">
-    <div id="comment-username-modal" class="panel">
-        <h2 class="head">提示 <i class="icon-remove" data-action="close"></i></h2>
-        <div class="content">
-            <h3 class="label">请填写您的名称：</h3>
-            <form action="http://goldtoutiao.com/thread/post_52/comments/save"
-                  class="fos_comment_comment_new_form"
-                  method="post">
-                <textarea class="input hidden" name="content"></textarea>
-                <input class="input" name="username" />
-                <input class="submit" type="submit" value="确认" />
-            </form>
-        </div>
-    </div>
-</div>
