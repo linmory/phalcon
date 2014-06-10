@@ -392,7 +392,8 @@ $(function(){
 
     //
     $('#side-fcl').fcl({
-        refreshPrice: true
+        refreshPrice: true,
+        filter: 'FD'
     });
     //
     $('#finance-calendar').fcl({
@@ -505,6 +506,7 @@ $(function(){
         $('#stare-fcl').fcl({
             autoScroll: true,
             refreshPrice: true,
+            filter: 'FD',
             heightChange: true
         });
         document.getElementById('stare-iframe').src = $('#stare-iframe').attr('data-src');
@@ -569,15 +571,18 @@ $(function(){
      * 用户评论
      */
     function hiedUsernameModal() {
-        $userName.find('textarea').val('');
+        //$userName.find('textarea').val('');
         $userName.find('[name=username]').val('');
         hideModal();
     }
     $(document).on('click', '.user-comments form.fos_comment_comment_new_form > [type=submit]', function(e){
 
-        var comment = $(this).parent().find('textarea').val();
+        var $form = $(this).parent();
+        var formId = $form[0].id;
+        var comment = $form.find('textarea').val();
         if (comment) {
-            $userName.find('textarea').val(comment);
+            //$userName.find('textarea').val(comment);
+            $userName.attr('data-form-id', formId);
             $modal.show(0, function(){
                 $userName.addClass('active');
             });
@@ -590,10 +595,13 @@ $(function(){
     $userName.on('click', '[type=submit]', function(e){
         var username = $userName.find('[name=username]').val();
         if (username) {
+            var formId = $userName.attr('data-form-id');
+            var $form = $('#' + formId);
+            $form.find('[name=username]').val(username);
+            $form.trigger('submit');
             hiedUsernameModal();
-        } else {
-            e.preventDefault();
         }
+        e.preventDefault();
     });
 
 });
