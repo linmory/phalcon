@@ -149,7 +149,7 @@ class Comments extends BaseModel
         $this->rootId = 0;
         $this->parentPath = '';
         $this->depth = 0;
-        $this->status = 0;
+        $this->status = 'approved';
         $this->createdAt = time();
     }
 }

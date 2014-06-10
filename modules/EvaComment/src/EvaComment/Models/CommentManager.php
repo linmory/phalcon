@@ -64,14 +64,54 @@ class CommentManager extends BaseModel
         return true;
     }
 
-    function findComments()
+    function findComments($query=array())
     {
-        $phql = 'SELECT * FROM Eva\EvaComment\Entities\Comments AS c ORDER BY c.createdAt DESC';
+//        $phql = 'SELECT * FROM Eva\EvaComment\Entities\Comments AS c ORDER BY c.createdAt DESC';
 
-        $manager = $this->getModelsManager();
-        $comments = $manager->createQuery($phql);
+//        $manager = $this->getModelsManager();
+//        $comments = $manager->createQuery($phql);
 
-        return $comments;
+//        return $comments;
+
+        $itemQuery = $this->getModelsManager()->createBuilder();
+
+        $itemQuery->from('Eva\EvaComment\Entities\Comments');
+
+        $orderMapping = array(
+            'id' => 'id ASC',
+            '-id' => 'id DESC',
+            'created_at' => 'createdAt ASC',
+            '-created_at' => 'createdAt DESC',
+        );
+
+        if (!empty($query['columns'])) {
+            $itemQuery->columns($query['columns']);
+        }
+
+        if (!empty($query['q'])) {
+            $itemQuery->andWhere('title LIKE :q:', array('q' => "%{$query['q']}%"));
+        }
+
+        if (!empty($query['status'])) {
+            $itemQuery->andWhere('status = :status:', array('status' => $query['status']));
+        }
+
+        if (!empty($query['uid'])) {
+            $itemQuery->andWhere('userId = :uid:', array('uid' => $query['uid']));
+        }
+
+        if (!empty($query['cid'])) {
+            $itemQuery->join('Eva\EvaBlog\Entities\CategoriesPosts', 'id = r.postId', 'r')
+                ->andWhere('r.categoryId = :cid:', array('cid' => $query['cid']));
+        }
+
+        $order = 'createdAt DESC';
+        if (!empty($query['order'])) {
+            $order = empty($orderMapping[$query['order']]) ? 'createdAt DESC' : $orderMapping[$query['order']];
+        }
+        $itemQuery->orderBy($order);
+
+        return $itemQuery;
     }
 
     function findCommentById($id)
