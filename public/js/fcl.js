@@ -389,7 +389,7 @@
         var root = this;
         var $target = this.$target;
         $.ajax({
-            url: 'http://api.markets.wallstreetcn.com/v1/calendar_item_values.json?id=' + this.refresh_price_param.substring(1),
+            url: 'http://api.markets.wallstreetcn.com/v1/calendar_item_values.json?id=' + root.refresh_price_param.substring(1),
             dataType: apiType,
             success: function(response) {
                 var results = response['results'];
@@ -401,7 +401,7 @@
                         var actual = results[l].actual.trim();
                         var previous = results[l].previous.trim();
                         var trend = '';
-                        if (actual) {
+                        if (actual && actual !== '&nbsp;') {
                             if (forecast) {
                                 if (parseFloat(actual) > parseFloat(forecast)) {
                                     trend = 'up';
@@ -423,7 +423,7 @@
                             $item.find('.actual .value').html(actual);
                             $item.find('.forecast .value').html(forecast);
                             $item.find('.previous .value').html(previous);
-                            this.refresh_price_param.replace('_' + id, '');
+                            root.refresh_price_param.replace('_' + id, '');
                         }
                     }
                 }
