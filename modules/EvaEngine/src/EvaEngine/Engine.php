@@ -6,14 +6,14 @@ use Phalcon\Mvc\Router;
 use Phalcon\Mvc\Url as UrlResolver;
 use Phalcon\DI\FactoryDefault;
 use Phalcon\Session\Adapter\Files as SessionAdapter;
-use Phalcon\Db\Adapter\Pdo\Mysql as DbAdapter;
 use Phalcon\Config;
-use Eva\EvaEngine\Mvc\View;
 use Phalcon\Loader;
 use Phalcon\Mvc\Application;
 use Phalcon\Events\Manager as EventsManager;
 use Phalcon\Logger\Adapter\File as FileLogger;
 use Phalcon\Mvc\Dispatcher;
+use Eva\EvaEngine\Mvc\View;
+use Eva\EvaEngine\Mvc\Model\Manager as ModelManager;
 
 use Eva\EvaEngine\ModuleManager;
 
@@ -106,6 +106,24 @@ class Engine
         return $this;
     }
 
+    public function readCache($cacheFile)
+    {
+        if(file_exists($cacheFile) && $cache = include($cacheFile)) {
+            return $cache;
+        }
+        return null;
+    }
+
+    public function writeCache($cacheFile, array $content)
+    {
+        if($cacheFile && $fh = fopen($cacheFile, 'w')) {
+            fwrite($fh, '<?php return ' . var_export($content, true) . ';');
+            fclose($fh);
+            return true;
+        }
+        return false;
+    }
+
     public function setDI(\Phalcon\DiInterface $di)
     {
         $this->di = $di;
@@ -121,232 +139,150 @@ class Engine
         $di = new FactoryDefault();
         $self = $this;
 
+        /**********************************
+        DI initialize for MVC core
+        ***********************************/
+
         //call loadmodules will overwrite this
         $di->set('moduleManager', function () {
             return new ModuleManager();
+        }, true);
+
+        //System global events manager
+        $di->set('eventsManager', function () {
+            return new EventsManager();
+        }, true);
+
+        $di->set('config', function () use ($self) {
+            return $self->diConfig();
+        }, true);
+
+        $di->set('router', function () use ($self) {
+            return $self->diRouter();
+        }, true);
+
+        $di->set('dispatcher', function () use ($di) {
+            $dispatcher = new Dispatcher();
+            $dispatcher->setEventsManager($di->getEventsManager());
+            return $dispatcher;
+        }, true);
+
+        $di->set('modelsMetadata', function () use ($di) {
+            $config = $di->getConfig();
+            $metaData = new \Phalcon\Mvc\Model\Metadata\Files($config->modelsMetadata->options->toArray());
+            return $metaData;
         });
 
-        $di->set('config', function () use ($di, $self) {
-            $cachePrefix = $self->getAppName();
-            $cacheFile = $self->getConfigPath() . "/_cache.$cachePrefix.config.php";
-            if(file_exists($cacheFile) && $cache = include($cacheFile)) {
-                return new Config($cache);
-            }
-
-            $config = new Config();
-
-            //merge all loaded module configs
-            $moduleManager = $di->get('moduleManager');
-            if ($moduleManager && $modules = $moduleManager->getModules()) {
-                foreach ($modules as $moduleName => $module) {
-                    $moduleConfig = $moduleManager->getModuleConfig($moduleName);
-                    if ($moduleConfig instanceof Config) {
-                        $config->merge($moduleConfig);
-                    } else {
-                        $config->merge(new Config($moduleConfig));
-                    }
-                }
-            }
-
-            //merge config default
-            $config->merge(new Config(include $self->getConfigPath() . "/config.default.php"));
-
-            //merge config local
-            if (false === file_exists($self->getConfigPath() . "/config.local.php")) {
-                return $config;
-            }
-            $config->merge(new Config(include $self->getConfigPath() . "/config.local.php"));
-
-            if($cacheFile && $fh = fopen($cacheFile, 'w')) {
-                fwrite($fh, '<?php return ' . var_export($config->toArray(), true) . ';');
-                fclose($fh);
-            }
-            return $config;
+        $di->set('modelsManager', function () use ($di) {
+            //for solving db master/slave under static find method
+            $modelsManager = new ModelManager();
+            return $modelsManager;
         });
-
-        $di->set('router', function () use ($di) {
-            $moduleManager = $di->get('moduleManager');
-
-            $config = new \Phalcon\Config();
-            if ($moduleManager && $modulesArray = $moduleManager->getModules()) {
-                foreach ($modulesArray as $moduleName => $module) {
-                    $config->merge(new \Phalcon\Config($moduleManager->getModuleRoutesBackend($moduleName)));
-                    $config->merge(new \Phalcon\Config($moduleManager->getModuleRoutesFrontend($moduleName)));
-                }
-            }
-
-            $router = new Router();
-            //$router->clear();
-            //$router->removeExtraSlashes(true);
-            $config = $config->toArray();
-            foreach ($config as $url => $route) {
-                if (count($route) !== count($route, COUNT_RECURSIVE)) {
-                    if (isset($route['pattern']) && isset($route['paths'])) {
-                        $method = isset($route['httpMethods']) ? $route['httpMethods'] : null;
-                        $router->add($route['pattern'], $route['paths'], $method);
-                    } else {
-                        throw new Exception\InvalidArgumentException(sprintf('No route pattern and paths found by route %s', $url));
-                    }
-                } else {
-                    $router->add($url, $route);
-                }
-            }
-            return $router;
-        });
-
-        $di->set('url', function () use ($di) {
-            $config = $di->get('config');
-            $url = new UrlResolver();
-            $url->setBaseUri($config->baseUri);
-
-            return $url;
-        });
-
-        $di->set('session', function () {
-            $session = new SessionAdapter();
-            if (!$session->isStarted()) {
-                //NOTICE: Get php warning here
-                @$session->start();
-            }
-
-            return $session;
-        });
-
-        $di->set('cookies', function () {
-            $cookies = new \Phalcon\Http\Response\Cookies();
-            $cookies->useEncryption(false);
-
-            return $cookies;
-        });
-
-
-        $di->set('viewCache', function() use ($di) {
-            $config = $di->get('config');
-
-            $frontCacheClass = $config->cache->viewCache->frontend->adapter;
-            $frontCacheClass = 'Phalcon\Cache\Frontend\\' . ucfirst($frontCacheClass);
-            $frontCache = new $frontCacheClass(
-                $config->cache->viewCache->frontend->options->toArray()
-            );
-
-            if(!$config->cache->enable || !$config->cache->viewCache) {
-                $cache = new \Eva\EvaEngine\Cache\Backend\Disable($frontCache);
-            } else {
-                $backendCacheClass = $config->cache->viewCache->backend->adapter;
-                $backendCacheClass = 'Phalcon\Cache\Backend\\' . ucfirst($backendCacheClass);
-                $cache = new $backendCacheClass($frontCache, array_merge(
-                    array(
-                        'prefix' => 'eva_view_',
-                    ),
-                    $config->cache->viewCache->backend->options->toArray()
-                ));
-            }
-            return $cache;
-        });
-
-        $di->set('modelCache', function() use ($di) {
-            $config = $di->get('config');
-
-            $frontCacheClass = $config->cache->modelCache->frontend->adapter;
-            $frontCacheClass = 'Phalcon\Cache\Frontend\\' . ucfirst($frontCacheClass);
-            $frontCache = new $frontCacheClass(
-                $config->cache->modelCache->frontend->options->toArray()
-            );
-
-            if(!$config->cache->enable || !$config->cache->modelCache) {
-                $cache = new \Eva\EvaEngine\Cache\Backend\Disable($frontCache);
-            } else {
-                $backendCacheClass = $config->cache->modelCache->backend->adapter;
-                $backendCacheClass = 'Phalcon\Cache\Backend\\' . ucfirst($backendCacheClass);
-                $cache = new $backendCacheClass($frontCache, array_merge(
-                    array(
-                        'prefix' => 'eva_model_',
-                    ),
-                    $config->cache->modelCache->backend->options->toArray()
-                ));
-            }
-            return $cache;
-        });
-
-        $di->set('apiCache', function() use ($di) {
-            $config = $di->get('config');
-
-            $frontCacheClass = $config->cache->apiCache->frontend->adapter;
-            $frontCacheClass = 'Phalcon\Cache\Frontend\\' . ucfirst($frontCacheClass);
-            $frontCache = new $frontCacheClass(
-                $config->cache->apiCache->frontend->options->toArray()
-            );
-
-            if(!$config->cache->enable || !$config->cache->apiCache) {
-                $cache = new \Eva\EvaEngine\Cache\Backend\Disable($frontCache);
-            } else {
-                $backendCacheClass = $config->cache->apiCache->backend->adapter;
-                $backendCacheClass = 'Phalcon\Cache\Backend\\' . ucfirst($backendCacheClass);
-                $cache = new $backendCacheClass($frontCache, array_merge(
-                    array(
-                        'prefix' => 'eva_api_',
-                    ),
-                    $config->cache->apiCache->backend->options->toArray()
-                ));
-            }
-            return $cache;
-        });
-
 
         $di->set('view', function () use ($di) {
             $view = new View();
             $view->setViewsDir(__DIR__ . '/views/');
-            $view->setEventsManager($di->get('eventsManager'));
+            $view->setEventsManager($di->getEventsManager());
             return $view;
         });
 
-        $di->set('mailer', function () use ($di) {
-            $config = $di->get('config');
-            $transport = \Swift_SmtpTransport::newInstance()
-            ->setHost($config->mailer->host)
-            ->setPort($config->mailer->port)
-            ->setEncryption($config->mailer->encryption)
-                ->setUsername($config->mailer->username)
-                ->setPassword($config->mailer->password)
-            ;
+        $di->set('session', function ($self) {
+            return $self->diSession();
 
-            $mailer = \Swift_Mailer::newInstance($transport);
-
-            return $mailer;
         });
 
-        $di->set('mailMessage', 'Eva\EvaEngine\MailMessage');
+        /**********************************
+        DI initialize for database
+        ***********************************/
+        $di->set('dbMaster', function () use ($self) {
+            return $self->diDbMaster();
+        });
 
+        $di->set('dbSlave', function () use ($self) {
+            return $self->diDbSlave();
+        });
+
+        /**********************************
+        DI initialize for cache
+        ***********************************/
+        $di->set('viewCache', function() use ($self) {
+            return $self->diViewCache();
+        });
+
+        $di->set('modelCache', function() use ($di) {
+            return $self->diModelCache();
+        });
+
+        $di->set('apiCache', function() use ($di) {
+            return $self->diApiCache();
+        });
+
+        /**********************************
+        DI initialize for queue
+        ***********************************/
         $di->set('queue', function () use ($di) {
-            $config = $di->get('config');
+            $config = $di->getConfig();
             $client = new \GearmanClient();
             $client->setTimeout(1000);
             foreach ($config->queue->servers as $key => $server) {
                 $client->addServer($server->host, $server->port);
             }
-
             return $client;
         });
 
         $di->set('worker', function () use ($di) {
-            $config = $di->get('config');
+            $config = $di->getConfig();
             $worker = new \GearmanWorker();
             foreach ($config->queue->servers as $key => $server) {
                 $worker->addServer($server->host, $server->port);
             }
-
             return $worker;
         });
 
-        $di->set('flash', function () {
-            $flash = new \Phalcon\Flash\Session();
 
-            return $flash;
+        /**********************************
+        DI initialize for email 
+        ***********************************/
+        $di->set('mailer', function () use ($self) {
+            return $self->diMailer();
+        });
+
+        $di->set('mailMessage', 'Eva\EvaEngine\MailMessage');
+
+        /**********************************
+        DI initialize for helpers
+        ***********************************/
+        $di->set('url', function () use ($di) {
+            $config = $di->get('config');
+            $url = new UrlResolver();
+            $url->setBaseUri($config->baseUri);
+            return $url;
         });
 
         $di->set('escaper', function () {
             return new \Phalcon\Escaper();
         });
+
+        $di->set('tag', function () use ($di) {
+            \Eva\EvaEngine\Tag::setDi($di);
+            return new \Eva\EvaEngine\Tag();
+        });
+
+        $di->set('placeholder', function(){
+            return new \Eva\EvaEngine\View\Helper\Placeholder();
+        }, true);
+
+        $di->set('cookies', function () {
+            $cookies = new \Phalcon\Http\Response\Cookies();
+            $cookies->useEncryption(false);
+            return $cookies;
+        });
+
+        $di->set('flash', function () {
+            $flash = new \Phalcon\Flash\Session();
+            return $flash;
+        });
+
 
         $di->set('translate', function () use ($di) {
             $config = $di->get('config');
@@ -362,14 +298,7 @@ class Engine
             return $translate;
         });
 
-        $di->set('tag', function () use ($di) {
-            \Eva\EvaEngine\Tag::setDi($di);
-            return new \Eva\EvaEngine\Tag();
-        });
 
-        $di->set('placeholder', function(){
-            return new \Eva\EvaEngine\View\Helper\Placeholder();
-        }, true);
 
         $di->set('logException', function () use ($di) {
             $config = $di->get('config');
@@ -377,95 +306,6 @@ class Engine
             return $logger = new FileLogger($config->logger->path . 'error_' . date('Y-m-d') . '.log');
         });
 
-        $di->set('modelsMetadata', function () use ($di) {
-            $config = $di->get('config');
-            $metaData = new \Phalcon\Mvc\Model\Metadata\Files($config->modelsMetadata->options->toArray());
-
-            return $metaData;
-        });
-
-        $di->set('dispatcher', function () use ($di) {
-            $eventsManager = $di->get('eventsManager');
-            $dispatcher = new Dispatcher();
-            $dispatcher->setEventsManager($eventsManager);
-            return $dispatcher;
-        }, true);
-
-        $di->set('dbMaster', function () use ($di) {
-            $config = $di->get('config');
-
-            $dbAdapter = new DbAdapter(array(
-                'host' => $config->dbAdapter->master->host,
-                'username' => $config->dbAdapter->master->username,
-                'password' => $config->dbAdapter->master->password,
-                'dbname' => $config->dbAdapter->master->database,
-                'charset' => isset($config->dbAdapter->master->charset) ? $config->dbAdapter->master->charset : 'utf8',
-            ));
-
-            if ($config->debug) {
-                $eventsManager = new EventsManager();
-                $logger = new FileLogger($config->logger->path . date('Y-m-d') . '.log');
-
-                //database service name hardcore as db
-                $eventsManager->attach('db', function ($event, $dbAdapter) use ($logger) {
-                    if ($event->getType() == 'beforeQuery') {
-                        $sqlVariables = $dbAdapter->getSQLVariables();
-                        if (count($sqlVariables)) {
-                            $query = str_replace(array('%', '?'), array('%%', "'%s'"), $dbAdapter->getSQLStatement());
-                            $query = vsprintf($query, $sqlVariables);
-                            //
-                            $logger->log($query, \Phalcon\Logger::INFO);
-                        } else {
-                            $logger->log($dbAdapter->getSQLStatement(), \Phalcon\Logger::INFO);
-                        }
-                    }
-                });
-                $dbAdapter->setEventsManager($eventsManager);
-            }
-
-            return $dbAdapter;
-        });
-
-        $di->set('modelsManager', function () use ($di) {
-            //for solving db master/slave under static find method
-            $modelsManager = new \Eva\EvaEngine\Mvc\Model\Manager();
-
-            return $modelsManager;
-        });
-
-        $di->set('dbSlave', function () use ($di) {
-            $config = $di->get('config');
-            $slaves = $config->dbAdapter->slave;
-            $slaveKey = array_rand($slaves->toArray());
-            $dbAdapter = new DbAdapter(array(
-                'host' => $config->dbAdapter->slave->$slaveKey->host,
-                'username' => $config->dbAdapter->slave->$slaveKey->username,
-                'password' => $config->dbAdapter->slave->$slaveKey->password,
-                'dbname' => $config->dbAdapter->slave->$slaveKey->database,
-                'charset' => isset($config->dbAdapter->slave->$slaveKey->charset) ? $config->dbAdapter->slave->$slaveKey->charset : 'utf8',
-            ));
-
-            if ($config->debug) {
-                $eventsManager = new EventsManager();
-                $logger = new FileLogger($config->logger->path . date('Y-m-d') . '.log');
-                $eventsManager->attach('db', function ($event, $dbAdapter) use ($logger) {
-                    if ($event->getType() == 'beforeQuery') {
-                        $sqlVariables = $dbAdapter->getSQLVariables();
-                        if (count($sqlVariables)) {
-                            $query = str_replace(array('%', '?'), array('%%', "'%s'"), $dbAdapter->getSQLStatement());
-                            $query = vsprintf($query, $sqlVariables);
-                            //
-                            $logger->log($query, \Phalcon\Logger::INFO);
-                        } else {
-                            $logger->log($dbAdapter->getSQLStatement(), \Phalcon\Logger::INFO);
-                        }
-                    }
-                });
-                $dbAdapter->setEventsManager($eventsManager);
-            }
-
-            return $dbAdapter;
-        });
 
 
 
@@ -482,13 +322,251 @@ class Engine
         return $this->di = $di;
     }
 
+    public function diConfig()
+    {
+        $di = $this->getDI();
+        $cachePrefix = $this->getAppName();
+        $cacheFile = $this->getConfigPath() . "/_cache.$cachePrefix.config.php";
+        if($cache = $this->readCache($cacheFile)) {
+            return new Config($cache);
+        }
+
+        $config = new Config();
+        //merge all loaded module configs
+        $moduleManager = $di->get('moduleManager');
+        if ($moduleManager && $modules = $moduleManager->getModules()) {
+            foreach ($modules as $moduleName => $module) {
+                $moduleConfig = $moduleManager->getModuleConfig($moduleName);
+                if ($moduleConfig instanceof Config) {
+                    $config->merge($moduleConfig);
+                } else {
+                    $config->merge(new Config($moduleConfig));
+                }
+            }
+        }
+
+        //merge config default
+        $config->merge(new Config(include $this->getConfigPath() . "/config.default.php"));
+
+        //merge config local
+        if (false === file_exists($this->getConfigPath() . "/config.local.php")) {
+            return $config;
+        }
+        $config->merge(new Config(include $this->getConfigPath() . "/config.local.php"));
+
+        $this->writeCache($cacheFile, $config->toArray());
+        return $config;
+    }
+
+    public function diRouter()
+    {
+        $di = $this->getDI();
+        $cachePrefix = $this->getAppName();
+        $cacheFile = $this->getConfigPath() . "/_cache.$cachePrefix.router.php";
+
+        $moduleManager = $di->getModuleManager();
+        $config = new Config();
+        if ($moduleManager && $modulesArray = $moduleManager->getModules()) {
+            foreach ($modulesArray as $moduleName => $module) {
+                $config->merge(new Config($moduleManager->getModuleRoutesBackend($moduleName)));
+                $config->merge(new Config($moduleManager->getModuleRoutesFrontend($moduleName)));
+            }
+        }
+
+        //Disable default router
+        $router = new Router(false);
+        //Last extra slash
+        $router->removeExtraSlashes(true);
+        $config = $config->toArray();
+        foreach ($config as $url => $route) {
+            if (count($route) !== count($route, COUNT_RECURSIVE)) {
+                if (isset($route['pattern']) && isset($route['paths'])) {
+                    $method = isset($route['httpMethods']) ? $route['httpMethods'] : null;
+                    $router->add($route['pattern'], $route['paths'], $method);
+                } else {
+                    throw new Exception\InvalidArgumentException(sprintf('No route pattern and paths found by route %s', $url));
+                }
+            } else {
+                $router->add($url, $route);
+            }
+        }
+        return $router;
+    }
+
+    public function diDbMaster()
+    {
+        $config = $this->getDI()->getConfig();
+        if(!isset($config->dbAdapter->master->adapter) || $config->dbAdapter->master) {
+            throw new Exception\InvalidArgumentException(sprintf('No DB Master options found'));
+        }
+        return $this->diDbAdapter($config->dbAdapter->master->adapter, $config->dbAdapter->master->toArray());
+    }
+
+    public function diDbSlave()
+    {
+        $config = $this->getDI()->getConfig();
+        $slaves = $config->dbAdapter->slave;
+        $slaveKey = array_rand($slaves->toArray());
+        if(!isset($slaves->$slaveKey) || count($slaves) < 1) {
+            throw new Exception\InvalidArgumentException(sprintf('No DB slave options found'));
+        }
+        return $this->diDbAdapter($slaves->$slaveKey->adapter, $slaves->$slaveKey->toArray());
+    }
+
+
+    protected function diDbAdapter($adapterName, array $options)
+    {
+        $adapterName = strtolower($adapterName);
+        $adapterMapping = array(
+            'mysql' => 'Phalcon\Db\Adapter\Pdo\Mysql',
+            'oracle' => 'Phalcon\Db\Adapter\Pdo\Oracle',
+            'postgresql' => 'Phalcon\Db\Adapter\Pdo\Postgresql',
+            'sqlite' => 'Phalcon\Db\Adapter\Pdo\Sqlite',
+        );
+
+        $options['charset'] = isset($options['charset']) && $options['charset'] ? $options['charset'] : 'utf8';
+
+        if(!isset($adapterMapping[$adapterName])) {
+            throw new Exception\InvalidArgumentException(sprintf('No matched DB adapter found by %s', $adapterName));
+        }
+
+        $dbAdapter = new $adapterMapping[$adapterName]($options);
+
+        $config = $this->getDI()->getConfig();
+        if ($config->debug) {
+            $di = $this->getDI();
+            $eventsManager = $di->getEventsManager();
+            $logger = new FileLogger($config->logger->path . date('Y-m-d') . '.log');
+
+            //database service name hardcore as db
+            $eventsManager->attach('db', function ($event, $dbAdapter) use ($logger) {
+                if ($event->getType() == 'beforeQuery') {
+                    $sqlVariables = $dbAdapter->getSQLVariables();
+                    if (count($sqlVariables)) {
+                        $query = str_replace(array('%', '?'), array('%%', "'%s'"), $dbAdapter->getSQLStatement());
+                        $query = vsprintf($query, $sqlVariables);
+                        //
+                        $logger->log($query, \Phalcon\Logger::INFO);
+                    } else {
+                        $logger->log($dbAdapter->getSQLStatement(), \Phalcon\Logger::INFO);
+                    }
+                }
+            });
+            $dbAdapter->setEventsManager($eventsManager);
+        }
+        return $dbAdapter;
+    }
+
+    public function diViewCache()
+    {
+        return $this->diCache('viewCache', 'eva_view_');
+    }
+
+    public function diModelCache()
+    {
+        return $this->diCache('modelCache', 'eva_model_');
+    }
+
+    public function diApiCache()
+    {
+        return $this->diCache('apiCache', 'eva_api_');
+    }
+
+    protected function diCache($configKey, $prefix = 'eva_')
+    {
+        $config = $this->getDI()->getConfig();
+        $adapterMapping = array(
+            'apc' => 'Phalcon\Cache\Backend\Apc',
+            'file' => 'Phalcon\Cache\Backend\File',
+            'libmemcached' => 'Phalcon\Cache\Backend\Libmemcached',
+            'memcache' => 'Phalcon\Cache\Backend\Memcache',
+            'memory' => 'Phalcon\Cache\Backend\Memory',
+            'mongo' => 'Phalcon\Cache\Backend\Mongo',
+            'xcache' => 'Phalcon\Cache\Backend\Xcache',
+            'base64' => 'Phalcon\Cache\Frontend\Base64',
+            'data' => 'Phalcon\Cache\Frontend\Data',
+            'igbinary' => 'Phalcon\Cache\Frontend\Igbinary',
+            'json' => 'Phalcon\Cache\Frontend\Json',
+            'none' => 'Phalcon\Cache\Frontend\None',
+            'output' => 'Phalcon\Cache\Frontend\Output',
+        );
+
+        $frontCacheClassName = strtolower($config->cache->$configKey->frontend->adapter);
+        if(!isset($adapterMapping[$frontCacheClassName])) {
+            throw new Exception\InvalidArgumentException(sprintf('No cache adapter found by %s', $frontCacheClassName));
+        }
+        $frontCacheClass = $adapterMapping[$frontCacheClassName];
+        $frontCache = new $frontCacheClass(
+            $config->cache->$configKey->frontend->options->toArray()
+        );
+
+        if(!$config->cache->enable || !$config->cache->$configKey->enable) {
+            $cache = new \Eva\EvaEngine\Cache\Backend\Disable($frontCache);
+        } else {
+            $backendCacheClassName = strtolower($config->cache->$configKey->backend->adapter);
+            if(!isset($adapterMapping[$backendCacheClassName])) {
+                throw new Exception\InvalidArgumentException(sprintf('No cache adapter found by %s', $backendCacheClassName));
+            }
+            $backendCacheClass = $adapterMapping[$backendCacheClass];
+            $cache = new $backendCacheClass($frontCache, array_merge(
+                array(
+                    'prefix' => $prefix,
+                ),
+                $config->cache->$configKey->backend->options->toArray()
+            ));
+        }
+        return $cache;
+    }
+
+    public function diMailer()
+    {
+        $config = $this->getDI()->getConfig();
+        if($config->mailer->transport == 'smtp') {
+            $transport = \Swift_SmtpTransport::newInstance()
+            ->setHost($config->mailer->host)
+            ->setPort($config->mailer->port)
+            ->setEncryption($config->mailer->encryption)
+            ->setUsername($config->mailer->username)
+            ->setPassword($config->mailer->password)
+            ;
+        } else {
+            $transport = \Swift_SendmailTransport::newInstance($config->mailer->sendmailCommand);
+        }
+        $mailer = \Swift_Mailer::newInstance($transport);
+        return $mailer;
+    }
+
+    public function diSession()
+    {
+        $adapterMapping = array(
+            'files' => 'Phalcon\Session\Adapter\Files',
+            'database' => 'Phalcon\Session\Adapter\Database',
+            'memcache' => 'Phalcon\Session\Adapter\Memcache',
+            'mongo' => 'Phalcon\Session\Adapter\Mongo',
+            'redis' => 'Phalcon\Session\Adapter\Redis',
+            'handlersocket' => 'Phalcon\Session\Adapter\HandlerSocket',
+        );
+
+        $config = $this->getDI()->getConfig();
+        $adapterKey = $config->session->adapter;
+        if(!isset($adapterMapping[$adapterKey])) {
+            throw new Exception\InvalidArgumentException(sprintf('No session adapter found by %s', $adapterKey));
+        }
+
+        $sessionClass = $adapterMapping[$adapterKey];
+        $session = new $sessionClass($config->session->options->toArray());
+        if (!$session->isStarted()) {
+            //NOTICE: Get php warning here, not found reason
+            @$session->start();
+        }
+        return $session;
+    }
 
     public function bootstrap()
     {
         $this->getApplication()->setDI($this->getDI());
         //Error Handler must run before router start
         $this->initErrorHandler(new Error\ErrorHandler);
-
         return $this;
     }
 
@@ -519,7 +597,6 @@ class Engine
         register_shutdown_function("$errorClass::shutdownHandler");
         return $this;
     }
-
 
 
     public function runCustom()
@@ -570,7 +647,6 @@ class Engine
         $response->sendHeaders();
         echo $response->getContent();
     }
-
 
 
     public function __construct($appRoot = null, $appName = 'evaengine')
