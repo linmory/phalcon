@@ -5,6 +5,7 @@ namespace Eva\EvaEngine;
 use Phalcon\Loader;
 use Phalcon\Events\EventsAwareInterface;
 use Phalcon\Events\ManagerInterface;
+use Phalcon\Events\Manager as EventsManager;
 
 class ModuleManager implements EventsAwareInterface
 {
@@ -56,7 +57,10 @@ class ModuleManager implements EventsAwareInterface
 
     public function getEventsManager()
     {
-        return $this->eventsManager;
+        if($this->eventsManager) {
+            return $this->eventsManager;
+        }
+        return new EventsManager();
     }
 
     public function setEventsManager($eventsManager)

@@ -82,31 +82,6 @@ class Engine
         return $this->modulesPath = $this->appRoot . '/modules';
     }
 
-    public function getApplication()
-    {
-        if ($this->application) {
-            return $this->application;
-        }
-
-        return $this->application = new Application();
-    }
-
-    public function loadModules(array $moduleSettings)
-    {
-        $moduleManager = $this->getDI()->getModuleManager();
-        if(!$this->getDI()->getConfig()->debug) {
-            $cachePrefix = $this->getAppName();
-            $cacheFile = $this->getConfigPath() . "/_cache.$cachePrefix.modules.php";
-            $moduleManager->setCacheFile($cacheFile);
-        }
-        $moduleManager
-            ->setDefaultPath($this->getModulesPath())
-            ->loadModules($moduleSettings, $this->getAppName());
-
-        $this->getApplication()->registerModules($moduleManager->getModules());
-        $this->getDI()->set('moduleManager', $moduleManager);
-        return $this;
-    }
 
     public function readCache($cacheFile)
     {
@@ -126,6 +101,34 @@ class Engine
         return false;
     }
 
+    public function getApplication()
+    {
+        if ($this->application) {
+            return $this->application;
+        }
+
+        return $this->application = new Application();
+    }
+
+    public function loadModules(array $moduleSettings)
+    {
+        $moduleManager = $this->getDI()->getModuleManager();
+
+        if(!$this->getDI()->getConfig()->debug) {
+            $cachePrefix = $this->getAppName();
+            $cacheFile = $this->getConfigPath() . "/_cache.$cachePrefix.modules.php";
+            $moduleManager->setCacheFile($cacheFile);
+        }
+
+        $moduleManager
+            ->setDefaultPath($this->getModulesPath())
+            ->loadModules($moduleSettings, $this->getAppName());
+
+        $this->getApplication()->registerModules($moduleManager->getModules());
+        $this->getDI()->set('moduleManager', $moduleManager);
+        return $this;
+    }
+
     public function setDI(\Phalcon\DiInterface $di)
     {
         $this->di = $di;
@@ -139,6 +142,8 @@ class Engine
         }
 
         $di = new FactoryDefault();
+
+        //PHP5.3 not support $this in closure
         $self = $this;
 
         /**********************************
@@ -172,7 +177,7 @@ class Engine
         }, true);
 
         $di->set('modelsMetadata', function () use ($self) {
-            return $this->diModelsMetaData();
+            return $self->diModelsMetaData();
         });
 
         $di->set('modelsManager', function () use ($di) {
@@ -277,40 +282,15 @@ class Engine
             return $cookies;
         });
 
-        $di->set('translate', function () use ($di) {
-            $config = $di->getConfig();
-            $file = $config->translate->path . $config->translate->forceLang . '.csv';
-            if (false === file_exists($file)) {
-                $file = $config->translate->path . 'empty.csv';
-            }
-            $translate = new \Phalcon\Translate\Adapter\Csv(array(
-                'file' => $file,
-                'delimiter' => ',',
-            ));
-
-            return $translate;
+        $di->set('translate', function () use ($self) {
+            return $self->diTranslate();
         });
-
-
 
         $di->set('logException', function () use ($di) {
             $config = $di->get('config');
 
             return $logger = new FileLogger($config->logger->path . 'error_' . date('Y-m-d') . '.log');
         });
-
-
-
-
-        /*
-        $di->set('fileSystem', function () use ($di) {
-            $config = $di->get('config');
-            $adapter = new \Gaufrette\Adapter\Local();
-            $filesystem = new Filesystem($adapter);
-
-            return $filesystem;
-        });
-        */
 
         return $this->di = $di;
     }
@@ -688,5 +668,4 @@ class Engine
         $this->appRoot = $appRoot ? $appRoot : __DIR__;
         $this->appName = $appName;
     }
-
 }
