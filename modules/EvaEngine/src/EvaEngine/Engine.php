@@ -1,4 +1,10 @@
 <?php
+/**
+* EvaEngine (http://evaengine.com/)
+*
+* @copyright Copyright (c) 2014 AlloVince (allo.vince@gmail.com)
+* @license   http://framework.zend.com/license/new-bsd New BSD License
+*/
 
 namespace Eva\EvaEngine;
 
@@ -15,6 +21,31 @@ use Eva\EvaEngine\Mvc\View;
 use Eva\EvaEngine\Mvc\Model\Manager as ModelManager;
 use Eva\EvaEngine\Tag;
 
+/**
+ * Core application configuration / bootstrap
+ * 
+ * Default application folder structures as
+ * 
+ * - AppRoot
+ * -- apps
+ * -- cache 
+ * -- config 
+ * -- logs 
+ * -- modules 
+ * -- public 
+ * -- tests 
+ * -- vendor 
+ * -- workers 
+ *
+ * The most common workflow is:
+ * <code>
+ * $engine = new Engine(__DIR__ . '/..');
+ * $engine->loadModules(include __DIR__ . '/../config/modules.php')
+ *        ->bootstrap()
+ *        ->run();
+ * </code>
+ *
+ */
 class Engine
 {
     protected $appRoot;
@@ -30,6 +61,19 @@ class Engine
     protected $configPath;
 
     protected $cacheEnable = false;
+
+    protected $environment; //development | test | production
+
+    public function getEnvironment()
+    {
+        return $this->environment = getenv('APPLICATION_ENV') ?: 'development';
+    }
+
+    public function setEnvironment($environment)
+    {
+        $this->environment = $environment;
+        return $this;
+    }
 
     public function setAppRoot($appRoot)
     {
@@ -110,11 +154,20 @@ class Engine
         return $this->application = new Application();
     }
 
+    /**
+     * Load modules from input settings, and call phalcon application->registerModules() for register
+     * 
+     * below events will be trigger 
+     * - module:beforeLoadModule
+     * - module:afterLoadModule
+     *
+     * @return FactoryDefault
+     */
     public function loadModules(array $moduleSettings)
     {
         $moduleManager = $this->getDI()->getModuleManager();
 
-        if(!$this->getDI()->getConfig()->debug) {
+        if($this->getEnvironment() == 'production') {
             $cachePrefix = $this->getAppName();
             $cacheFile = $this->getConfigPath() . "/_cache.$cachePrefix.modules.php";
             $moduleManager->setCacheFile($cacheFile);
@@ -125,6 +178,7 @@ class Engine
             ->loadModules($moduleSettings, $this->getAppName());
 
         $this->getApplication()->registerModules($moduleManager->getModules());
+        //Overwirte default modulemanager
         $this->getDI()->set('moduleManager', $moduleManager);
         return $this;
     }
@@ -135,6 +189,13 @@ class Engine
         return $this;
     }
 
+    /**
+     * Configuration application default DI
+     *
+     * Most DI settings from config file
+     *
+     * @return FactoryDefault
+     */
     public function getDI()
     {
         if ($this->di) {
@@ -306,15 +367,17 @@ class Engine
 
         $config = new Config();
         //merge all loaded module configs
-        $moduleManager = $di->get('moduleManager');
-        if ($moduleManager && $modules = $moduleManager->getModules()) {
-            foreach ($modules as $moduleName => $module) {
-                $moduleConfig = $moduleManager->getModuleConfig($moduleName);
-                if ($moduleConfig instanceof Config) {
-                    $config->merge($moduleConfig);
-                } else {
-                    $config->merge(new Config($moduleConfig));
-                }
+        $moduleManager = $di->getModuleManager();
+        if (!$moduleManager || !$modules = $moduleManager->getModules()) {
+            throw new Exception\InvalidArgumentException(sprintf('Config need at least one module loaded'));
+        }
+
+        foreach ($modules as $moduleName => $module) {
+            $moduleConfig = $moduleManager->getModuleConfig($moduleName);
+            if ($moduleConfig instanceof Config) {
+                $config->merge($moduleConfig);
+            } else {
+                $config->merge(new Config($moduleConfig));
             }
         }
 
@@ -578,6 +641,12 @@ class Engine
 
     public function bootstrap()
     {
+        if ($this->getDI()->getConfig()->debug) {
+            $debugger = new \Phalcon\Debug();
+            $debugger->debugVar($this->getApplication()->getModules(), 'modules');
+            $debugger->listen(true, true);
+        }
+
         $this->getApplication()->setDI($this->getDI());
         //Error Handler must run before router start
         $this->initErrorHandler(new Error\ErrorHandler);
@@ -586,15 +655,6 @@ class Engine
 
     public function run()
     {
-        $di = $this->getDI();
-
-        $debug = $di->get('config')->debug;
-        if ($debug) {
-            $debugger = new \Phalcon\Debug();
-            $debugger->debugVar($this->getApplication()->getModules(), 'modules');
-            $debugger->listen(true, true);
-        }
-
         $response = $this->getApplication()->handle();
         echo $response->getContent();
     }
@@ -663,6 +723,12 @@ class Engine
     }
 
 
+    /**
+     * Constructor
+     *
+     * @param string Application root path
+     * @param string Application name for some cache prefix
+     */
     public function __construct($appRoot = null, $appName = 'evaengine')
     {
         $this->appRoot = $appRoot ? $appRoot : __DIR__;

@@ -12,7 +12,7 @@ list:
 
 
 test:
-	phpunit --bootstrap Bootstrap.php ./tests
+	phpunit --bootstrap ./tests/Bootstrap.php ./tests
 
 git-pull:
 	git pull origin master
