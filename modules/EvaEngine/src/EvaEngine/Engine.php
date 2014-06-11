@@ -238,8 +238,8 @@ class Engine
         }, true);
 
         $di->set('modelsMetadata', function () use ($self) {
-            return $self->diModelsMetaData();
-        });
+            return $self->diModelsMetadata();
+        }, true);
 
         $di->set('modelsManager', function () use ($di) {
             //for solving db master/slave under static find method
@@ -369,7 +369,7 @@ class Engine
         //merge all loaded module configs
         $moduleManager = $di->getModuleManager();
         if (!$moduleManager || !$modules = $moduleManager->getModules()) {
-            throw new Exception\InvalidArgumentException(sprintf('Config need at least one module loaded'));
+            throw new Exception\RuntimeException(sprintf('Config need at least one module loaded'));
         }
 
         foreach ($modules as $moduleName => $module) {
@@ -422,7 +422,7 @@ class Engine
                     $method = isset($route['httpMethods']) ? $route['httpMethods'] : null;
                     $router->add($route['pattern'], $route['paths'], $method);
                 } else {
-                    throw new Exception\InvalidArgumentException(sprintf('No route pattern and paths found by route %s', $url));
+                    throw new Exception\RuntimeException(sprintf('No route pattern and paths found by route %s', $url));
                 }
             } else {
                 $router->add($url, $route);
@@ -431,7 +431,7 @@ class Engine
         return $router;
     }
 
-    public function diModelsMetaData()
+    public function diModelsMetadata()
     {
         $adapterMapping = array(
             'apc' => 'Phalcon\Mvc\Model\MetaData\Apc',
@@ -450,7 +450,7 @@ class Engine
 
         $adapterKey = strtolower($config->modelsMetadata->adapter);
         if(!isset($adapterMapping[$adapterKey])) {
-            throw new Exception\InvalidArgumentException(sprintf('No metadata adapter found by %s', $adapterKey));
+            throw new Exception\RuntimeException(sprintf('No metadata adapter found by %s', $adapterKey));
         }
         $adapterClass = $adapterMapping[$adapterKey];
         return new $adapterClass($config->modelsMetadata->options->toArray());
@@ -460,7 +460,7 @@ class Engine
     {
         $config = $this->getDI()->getConfig();
         if(!isset($config->dbAdapter->master->adapter) || !$config->dbAdapter->master) {
-            throw new Exception\InvalidArgumentException(sprintf('No DB Master options found'));
+            throw new Exception\RuntimeException(sprintf('No DB Master options found'));
         }
         return $this->diDbAdapter($config->dbAdapter->master->adapter, $config->dbAdapter->master->toArray());
     }
@@ -471,7 +471,7 @@ class Engine
         $slaves = $config->dbAdapter->slave;
         $slaveKey = array_rand($slaves->toArray());
         if(!isset($slaves->$slaveKey) || count($slaves) < 1) {
-            throw new Exception\InvalidArgumentException(sprintf('No DB slave options found'));
+            throw new Exception\RuntimeException(sprintf('No DB slave options found'));
         }
         return $this->diDbAdapter($slaves->$slaveKey->adapter, $slaves->$slaveKey->toArray());
     }
@@ -490,7 +490,7 @@ class Engine
         $options['charset'] = isset($options['charset']) && $options['charset'] ? $options['charset'] : 'utf8';
 
         if(!isset($adapterMapping[$adapterName])) {
-            throw new Exception\InvalidArgumentException(sprintf('No matched DB adapter found by %s', $adapterName));
+            throw new Exception\RuntimeException(sprintf('No matched DB adapter found by %s', $adapterName));
         }
 
         $dbAdapter = new $adapterMapping[$adapterName]($options);
@@ -556,7 +556,7 @@ class Engine
 
         $frontCacheClassName = strtolower($config->cache->$configKey->frontend->adapter);
         if(!isset($adapterMapping[$frontCacheClassName])) {
-            throw new Exception\InvalidArgumentException(sprintf('No cache adapter found by %s', $frontCacheClassName));
+            throw new Exception\RuntimeException(sprintf('No cache adapter found by %s', $frontCacheClassName));
         }
         $frontCacheClass = $adapterMapping[$frontCacheClassName];
         $frontCache = new $frontCacheClass(
@@ -568,7 +568,7 @@ class Engine
         } else {
             $backendCacheClassName = strtolower($config->cache->$configKey->backend->adapter);
             if(!isset($adapterMapping[$backendCacheClassName])) {
-                throw new Exception\InvalidArgumentException(sprintf('No cache adapter found by %s', $backendCacheClassName));
+                throw new Exception\RuntimeException(sprintf('No cache adapter found by %s', $backendCacheClassName));
             }
             $backendCacheClass = $adapterMapping[$backendCacheClass];
             $cache = new $backendCacheClass($frontCache, array_merge(
@@ -613,7 +613,7 @@ class Engine
         $config = $this->getDI()->getConfig();
         $adapterKey = strtolower($config->session->adapter);
         if(!isset($adapterMapping[$adapterKey])) {
-            throw new Exception\InvalidArgumentException(sprintf('No session adapter found by %s', $adapterKey));
+            throw new Exception\RuntimeException(sprintf('No session adapter found by %s', $adapterKey));
         }
 
         $sessionClass = $adapterMapping[$adapterKey];
@@ -646,7 +646,6 @@ class Engine
             $debugger->debugVar($this->getApplication()->getModules(), 'modules');
             $debugger->listen(true, true);
         }
-
         $this->getApplication()->setDI($this->getDI());
         //Error Handler must run before router start
         $this->initErrorHandler(new Error\ErrorHandler);

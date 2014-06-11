@@ -130,12 +130,17 @@ class ModuleManager implements EventsAwareInterface
                 $moduleKey = ucfirst($key);
                 $module = array_merge($defaultModuleSetting, $module);
             } elseif (is_string($module)) {
-                $moduleKey = ucfirst($module);
-                //Only Module Name means its a Eva Standard module
-                $module = array_merge($defaultModuleSetting, array(
-                    'className' => "Eva\\$moduleKey\\Module",
-                    'path' => "$modulesPath/$moduleKey/Module.php",
-                ));
+                //TODO: if module already registered in composer
+                if(class_exists($module)) {
+                    continue;
+                } else {
+                    $moduleKey = ucfirst($module);
+                    //Only Module Name means its a Eva Standard module
+                    $module = array_merge($defaultModuleSetting, array(
+                        'className' => "Eva\\$moduleKey\\Module",
+                        'path' => "$modulesPath/$moduleKey/Module.php",
+                    ));
+                }
             } else {
                 throw new \Exception(sprintf('Module %s load failed by incorrect format', $key));
             }
