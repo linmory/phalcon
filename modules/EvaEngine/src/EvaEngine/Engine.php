@@ -570,7 +570,7 @@ class Engine
             if(!isset($adapterMapping[$backendCacheClassName])) {
                 throw new Exception\RuntimeException(sprintf('No cache adapter found by %s', $backendCacheClassName));
             }
-            $backendCacheClass = $adapterMapping[$backendCacheClass];
+            $backendCacheClass = $adapterMapping[$backendCacheClassName];
             $cache = new $backendCacheClass($frontCache, array_merge(
                 array(
                     'prefix' => $prefix,
