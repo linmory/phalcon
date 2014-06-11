@@ -14,7 +14,7 @@ class ModuleManager implements EventsAwareInterface
 
     protected $loader;
 
-    protected $cachePath;
+    protected $cacheFile;
 
     protected $eventsManager;
 
@@ -43,15 +43,15 @@ class ModuleManager implements EventsAwareInterface
         return $this;
     }
 
-    public function setCachePath($cachePath)
+    public function setCacheFile($cacheFile)
     {
-        $this->cachePath = $cachePath;
+        $this->cacheFile = $cacheFile;
         return $this;
     }
 
-    public function getCachePath()
+    public function getCacheFile()
     {
-        return $this->cachePath;
+        return $this->cacheFile;
     }
 
     public function getEventsManager()
@@ -64,21 +64,38 @@ class ModuleManager implements EventsAwareInterface
         return $this->eventsManager = $eventsManager;
     }
 
+    public function readCache($cacheFile)
+    {
+        if(file_exists($cacheFile) && $cache = include($cacheFile)) {
+            return $cache;
+        }
+        return null;
+    }
+
+    public function writeCache($cacheFile, array $content)
+    {
+        if($cacheFile && $fh = fopen($cacheFile, 'w')) {
+            fwrite($fh, '<?php return ' . var_export($content, true) . ';');
+            fclose($fh);
+            return true;
+        }
+        return false;
+    }
+
     public function getModules()
     {
         return $this->modules;
     }
 
-    public function loadModules(array $moduleSettings, $cachePrefix = 'default')
+    public function loadModules(array $moduleSettings)
     {
         //Trigger Event
         $this->getEventsManager()->fire('module:beforeLoadModule', $this);
 
-        $cachePath = $this->getCachePath();
-        $cacheFile = $cachePath ? $cachePath . "/_cache.$cachePrefix.module.php" : '';
+        $cacheFile = $this->getCacheFile();
         $loader = $this->getLoader();
 
-        if(file_exists($cacheFile) && $cache = include($cacheFile)) {
+        if($cacheFile && $cache = $this->readCache($cacheFile)) {
             $loader->registerNamespaces($cache['namespaces'])->register();
             $loader->registerClasses($cache['classes'])->register();
             $this->modules = $cache['modules'];
@@ -97,6 +114,7 @@ class ModuleManager implements EventsAwareInterface
             'routesBackend' => '',
             'listener' => '',
             'namespaces' => '',
+            'translate' => '',
         );
 
         $modules = array();
@@ -144,18 +162,15 @@ class ModuleManager implements EventsAwareInterface
         }
         $loader->registerNamespaces($namespaces)->register();
 
-
         $this->modules = $modules;
 
-        if($cacheFile && $fh = fopen($cacheFile, 'w')) {
-            fwrite($fh, '<?php return ' . var_export(array(
-                    'classes' => $classes,
-                    'namespaces' => $namespaces,
-                    'modules' => $modules,
-            ), true) . ';');
-            fclose($fh);
+        if($cacheFile) {
+            $this->writeCache($cacheFile, array(
+                'classes' => $classes,
+                'namespaces' => $namespaces,
+                'modules' => $modules,
+            ));
         }
-
         //Trigger Event
         $this->getEventsManager()->fire('module:afterLoadModule', $this);
         return $this;

@@ -13,6 +13,7 @@ use Phalcon\Logger\Adapter\File as FileLogger;
 use Phalcon\Mvc\Dispatcher;
 use Eva\EvaEngine\Mvc\View;
 use Eva\EvaEngine\Mvc\Model\Manager as ModelManager;
+use Eva\EvaEngine\Tag;
 
 class Engine
 {
@@ -93,9 +94,13 @@ class Engine
     public function loadModules(array $moduleSettings)
     {
         $moduleManager = $this->getDI()->getModuleManager();
+        if(!$this->getDI()->getConfig()->debug) {
+            $cachePrefix = $this->getAppName();
+            $cacheFile = $this->getConfigPath() . "/_cache.$cachePrefix.modules.php";
+            $moduleManager->setCacheFile($cacheFile);
+        }
         $moduleManager
             ->setDefaultPath($this->getModulesPath())
-            ->setCachePath($this->getConfigPath())
             ->loadModules($moduleSettings, $this->getAppName());
 
         $this->getApplication()->registerModules($moduleManager->getModules());
@@ -258,8 +263,8 @@ class Engine
         $di->set('escaper', 'Phalcon\Escaper');
 
         $di->set('tag', function () use ($di) {
-            \Eva\EvaEngine\Tag::setDi($di);
-            return new \Eva\EvaEngine\Tag();
+            Tag::setDi($di);
+            return new Tag();
         });
 
         $di->set('flash', 'Phalcon\Flash\Session');
@@ -342,7 +347,9 @@ class Engine
         }
         $config->merge(new Config(include $this->getConfigPath() . "/config.local.php"));
 
-        $this->writeCache($cacheFile, $config->toArray());
+        if(!$config->debug) {
+            $this->writeCache($cacheFile, $config->toArray());
+        }
         return $config;
     }
 
@@ -570,9 +577,23 @@ class Engine
         $session = new $sessionClass($config->session->options->toArray());
         if (!$session->isStarted()) {
             //NOTICE: Get php warning here, not found reason
-            @$session->start();
+            $session->start();
         }
         return $session;
+    }
+
+    public function diTranslate()
+    {
+        $config = $this->getDI()->getConfig();
+        $file = $config->translate->path . $config->translate->forceLang . '.csv';
+        if (false === file_exists($file)) {
+            $file = $config->translate->path . 'empty.csv';
+        }
+        $translate = new \Phalcon\Translate\Adapter\Csv(array(
+            'file' => $file,
+            'delimiter' => ',',
+        ));
+        return $translate;
     }
 
     public function bootstrap()
