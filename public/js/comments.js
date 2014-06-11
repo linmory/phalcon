@@ -548,4 +548,41 @@
 
     window.fos = window.fos || {};
     window.fos.Comment = FOS_COMMENT;
+
+    /**
+     * 用户评论
+     */
+    function hiedUsernameModal() {
+        var $modal = $('#comment-username-modal');
+        $modal.find('[name=username]').val('');
+        $modal.unwrap();
+    }
+    $(document).on('click', '.user-comments form.fos_comment_comment_new_form > [type=submit]', function(e){
+
+        var $form = $(this).parent();
+        var formId = $form[0].id;
+        var comment = $form.find('textarea').val();
+        if (comment) {
+            var $modal = $('#comment-username-modal');
+            $modal.attr('data-form-id', formId);
+            $modal.wrap('<div class="modal-wrap"></div>');
+        }
+        e.preventDefault();
+    });
+    $(document).on('click', '#comment-username-modal [data-action=close]', function(e){
+        hiedUsernameModal();
+    });
+    $(document).on('click', '#comment-username-modal [type=submit]', function(e){
+        var $modal = $('#comment-username-modal');
+        var username = $modal.find('[name=username]').val();
+        if (username) {
+            var formId = $modal.attr('data-form-id');
+            var $form = $('#' + formId);
+            $form.find('[name=username]').val(username);
+            $form.trigger('submit');
+            hiedUsernameModal();
+        }
+        e.preventDefault();
+    });
+
 })(window, window.jQuery, window.easyXDM);

@@ -487,7 +487,6 @@ $(function(){
     */
     var $modal = $('#modal');
     var $stare = $('#stare-modal');
-    var $userName = $('#comment-username-modal');
 
     function hideModal() {
         //todo
@@ -537,6 +536,11 @@ $(function(){
 
     }
 
+    $(document).on('click', '.modal-wrap', function(e){
+        if (e.target == this) {
+            $(this).children().unwrap();
+        }
+    });
     $modal.on('click', function(e){
         if (e.target == this) {
             hideModal();
@@ -565,43 +569,6 @@ $(function(){
     });
     $('#stare-modal>.close').click(function(){
         hideModal();
-    });
-
-    /**
-     * 用户评论
-     */
-    function hiedUsernameModal() {
-        //$userName.find('textarea').val('');
-        $userName.find('[name=username]').val('');
-        hideModal();
-    }
-    $(document).on('click', '.user-comments form.fos_comment_comment_new_form > [type=submit]', function(e){
-
-        var $form = $(this).parent();
-        var formId = $form[0].id;
-        var comment = $form.find('textarea').val();
-        if (comment) {
-            //$userName.find('textarea').val(comment);
-            $userName.attr('data-form-id', formId);
-            $modal.show(0, function(){
-                $userName.addClass('active');
-            });
-        }
-        e.preventDefault();
-    });
-    $userName.on('click', '[data-action=close]', function(e){
-        hiedUsernameModal();
-    });
-    $userName.on('click', '[type=submit]', function(e){
-        var username = $userName.find('[name=username]').val();
-        if (username) {
-            var formId = $userName.attr('data-form-id');
-            var $form = $('#' + formId);
-            $form.find('[name=username]').val(username);
-            $form.trigger('submit');
-            hiedUsernameModal();
-        }
-        e.preventDefault();
     });
 
 });
