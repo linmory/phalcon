@@ -1,7 +1,22 @@
 <?php
 
 return array(
-    'debug' => 1,
+    //Phalcon default settings
+    'baseUri' => '/',
+
+
+    //System DI settings:
+    
+    'debug' => 1, //Global debug switcher
+
+    'modelsMetadata' => array(
+        'enable' => true,
+        'adapter' => 'files',
+        'options' => array(
+            'metaDataDir' => __DIR__ . '/../cache/schema/'
+        ),
+    ),
+
     'error' => array(
         'disableLog' => 0,
         'logPath' => __DIR__ . '/../logs/',
@@ -9,7 +24,6 @@ return array(
         'controller' => 'error',
         'action' => 'index',
         'viewpath' => '',
-
     ),
 
     'assets' => array(
@@ -68,7 +82,11 @@ return array(
         ),
     ),
 
-    'baseUri' => '/',
+    'session' => array(
+        'adapter' => 'files',
+        'options' => array()
+    ),
+
 
     'thumbnail' => array(
         'default' => array(
@@ -104,10 +122,6 @@ return array(
         'forceLang' => 'zh_CN',
     ),
 
-    'routes' => array(
-
-    ),
-
     'datetime' => array(
         'defaultTimezone' => 8,
         //'defaultFormat' => 'F j, Y, g:i a',
@@ -124,33 +138,32 @@ return array(
 
     'dbAdapter' => array(
         'master' => array(
-            'driver' => 'Pdo_Mysql',
+            /*
+            'adapter' => 'mysql',
             'host' => '192.168.1.228',
-            'database' => 'eva',
+            'dbname' => 'eva',
             'username' => 'root',
             'password' => '',
-            'charset'  => 'utf8'
+            'charset'  => 'utf8',
+            'prefix' => 'eva_',
+            */
         ),
         'slave' => array(
+            /*
             'slave1' => array(
-                'driver' => 'Pdo_Mysql',
+                'adapter' => 'mysql',
                 'host' => '192.168.1.233',
-                'database' => 'eva',
+                'dbname' => 'eva',
                 'username' => 'root',
                 'password' => '',
-                'charset'  => 'utf8'
+                'charset'  => 'utf8',
+                'prefix' => 'eva_',
             ),
+            */
         )
     ),
 
-    'modelsMetadata' => array(
-        'enable' => true,
-        'adapter' => 'File',
-        'options' => array(
-            'metaDataDir' => __DIR__ . '/../cache/schema/'
 
-        ),
-    ),
 
     'queue' => array(
         'servers' => array(
@@ -162,8 +175,9 @@ return array(
     ),
 
     'mailer' => array(
-        'async' => false,
-        'transport' => 'smtp', //or default
+        'async' => false, //if true will use queue to send， require run worker/sendmail.php
+        'transport' => 'smtp', //or sendmail
+        'sendmailCommand' => '/usr/sbin/exim -bs',
         'host' => 'smtp.gmail.com',
         'port' => 465,
         'encryption' => 'ssl',

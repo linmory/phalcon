@@ -3,8 +3,11 @@
 namespace Eva\EvaEngine;
 
 use Phalcon\Loader;
+use Phalcon\Events\EventsAwareInterface;
+use Phalcon\Events\ManagerInterface;
+use Phalcon\Events\Manager as EventsManager;
 
-class ModuleManager
+class ModuleManager implements EventsAwareInterface
 {
     protected $modules = array();
 
@@ -12,7 +15,7 @@ class ModuleManager
 
     protected $loader;
 
-    protected $cachePath;
+    protected $cacheFile;
 
     protected $eventsManager;
 
@@ -41,20 +44,23 @@ class ModuleManager
         return $this;
     }
 
-    public function setCachePath($cachePath)
+    public function setCacheFile($cacheFile)
     {
-        $this->cachePath = $cachePath;
+        $this->cacheFile = $cacheFile;
         return $this;
     }
 
-    public function getCachePath()
+    public function getCacheFile()
     {
-        return $this->cachePath;
+        return $this->cacheFile;
     }
 
     public function getEventsManager()
     {
-        return $this->eventsManager;
+        if($this->eventsManager) {
+            return $this->eventsManager;
+        }
+        return new EventsManager();
     }
 
     public function setEventsManager($eventsManager)
@@ -62,16 +68,44 @@ class ModuleManager
         return $this->eventsManager = $eventsManager;
     }
 
-    public function loadModules(array $moduleSettings, $cachePrefix = 'default')
+    public function readCache($cacheFile)
     {
-        $cachePath = $this->getCachePath();
-        $cacheFile = $cachePath ? $cachePath . "/_cache.$cachePrefix.module.php" : '';
+        if(file_exists($cacheFile) && $cache = include($cacheFile)) {
+            return $cache;
+        }
+        return null;
+    }
+
+    public function writeCache($cacheFile, array $content)
+    {
+        if($cacheFile && $fh = fopen($cacheFile, 'w')) {
+            fwrite($fh, '<?php return ' . var_export($content, true) . ';');
+            fclose($fh);
+            return true;
+        }
+        return false;
+    }
+
+    public function getModules()
+    {
+        return $this->modules;
+    }
+
+    public function loadModules(array $moduleSettings)
+    {
+        //Trigger Event
+        $this->getEventsManager()->fire('module:beforeLoadModule', $this);
+
+        $cacheFile = $this->getCacheFile();
         $loader = $this->getLoader();
 
-        if(file_exists($cacheFile) && $cache = include($cacheFile)) {
+        if($cacheFile && $cache = $this->readCache($cacheFile)) {
             $loader->registerNamespaces($cache['namespaces'])->register();
             $loader->registerClasses($cache['classes'])->register();
             $this->modules = $cache['modules'];
+
+            //Trigger Event
+            $this->getEventsManager()->fire('module:afterLoadModule', $this);
             return $this;
         }
 
@@ -84,6 +118,7 @@ class ModuleManager
             'routesBackend' => '',
             'listener' => '',
             'namespaces' => '',
+            'translate' => '',
         );
 
         $modules = array();
@@ -95,12 +130,17 @@ class ModuleManager
                 $moduleKey = ucfirst($key);
                 $module = array_merge($defaultModuleSetting, $module);
             } elseif (is_string($module)) {
-                $moduleKey = ucfirst($module);
-                //Only Module Name means its a Eva Standard module
-                $module = array_merge($defaultModuleSetting, array(
-                    'className' => "Eva\\$moduleKey\\Module",
-                    'path' => "$modulesPath/$moduleKey/Module.php",
-                ));
+                //TODO: if module already registered in composer
+                if(class_exists($module)) {
+                    continue;
+                } else {
+                    $moduleKey = ucfirst($module);
+                    //Only Module Name means its a Eva Standard module
+                    $module = array_merge($defaultModuleSetting, array(
+                        'className' => "Eva\\$moduleKey\\Module",
+                        'path' => "$modulesPath/$moduleKey/Module.php",
+                    ));
+                }
             } else {
                 throw new \Exception(sprintf('Module %s load failed by incorrect format', $key));
             }
@@ -131,30 +171,24 @@ class ModuleManager
         }
         $loader->registerNamespaces($namespaces)->register();
 
-
         $this->modules = $modules;
 
-        if($cacheFile && $fh = fopen($cacheFile, 'w')) {
-            fwrite($fh, '<?php return ' . var_export(array(
-                    'classes' => $classes,
-                    'namespaces' => $namespaces,
-                    'modules' => $modules,
-            ), true) . ';');
-            fclose($fh);
+        if($cacheFile) {
+            $this->writeCache($cacheFile, array(
+                'classes' => $classes,
+                'namespaces' => $namespaces,
+                'modules' => $modules,
+            ));
         }
-
+        //Trigger Event
+        $this->getEventsManager()->fire('module:afterLoadModule', $this);
         return $this;
-    }
-
-    public function getModules()
-    {
-        return $this->modules;
     }
 
     public function getModulePath($moduleName)
     {
         $modules = $this->getModules();
-        if (isset($modules[$moduleName]['dir']) && file_exists($modules[$moduleName]['dir'])) {
+        if (!empty($modules[$moduleName]['dir']) && file_exists($modules[$moduleName]['dir'])) {
             return $modules[$moduleName]['dir'];
         }
         return '';
@@ -163,7 +197,7 @@ class ModuleManager
     public function getModuleConfig($moduleName)
     {
         $modules = $this->getModules();
-        if (isset($modules[$moduleName]['moduleConfig']) && file_exists($modules[$moduleName]['moduleConfig'])) {
+        if (!empty($modules[$moduleName]['moduleConfig']) && file_exists($modules[$moduleName]['moduleConfig'])) {
             return include $modules[$moduleName]['moduleConfig'];
         }
         return array();
@@ -172,7 +206,7 @@ class ModuleManager
     public function getModuleRoutesFrontend($moduleName)
     {
         $modules = $this->getModules();
-        if (isset($modules[$moduleName]['routesFrontend']) &&  $modules[$moduleName]['routesFrontend'] && file_exists($modules[$moduleName]['routesFrontend'])) {
+        if (!empty($modules[$moduleName]['routesFrontend']) && file_exists($modules[$moduleName]['routesFrontend'])) {
             return include $modules[$moduleName]['routesFrontend'];
         }
         return array();
@@ -181,7 +215,7 @@ class ModuleManager
     public function getModuleRoutesBackend($moduleName)
     {
         $modules = $this->getModules();
-        if (isset($modules[$moduleName]['routesBackend']) && $modules[$moduleName]['routesBackend'] && file_exists($modules[$moduleName]['routesBackend'])) {
+        if (!empty($modules[$moduleName]['routesBackend']) && file_exists($modules[$moduleName]['routesBackend'])) {
             return include $modules[$moduleName]['routesBackend'];
         }
         return array();
@@ -190,7 +224,7 @@ class ModuleManager
     public function getModuleListener($moduleName)
     {
         $modules = $this->getModules();
-        if (isset($modules[$moduleName]['listener']) && $modules[$moduleName]['listener'] && file_exists($modules[$moduleName]['listener'])) {
+        if (!empty($modules[$moduleName]['listener']) && file_exists($modules[$moduleName]['listener'])) {
             return include $modules[$moduleName]['listener'];
         }
         return array();

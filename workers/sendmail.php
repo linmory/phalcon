@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+//Send email by Gearman queue
 require __DIR__ . '/../init_autoloader.php';
 
 $engine = new \Eva\EvaEngine\Engine(__DIR__ . '/..');

@@ -120,10 +120,23 @@ class CommentManager extends BaseModel
         return $comment;
     }
 
+    function updateCommentStatus($comment,$status)
+    {
+        $comment->status = $status;
+        $comment->updatedAt = time();
+        $comment->save();
+
+        $comment->thread->lastEditAt = time();
+        $comment->thread->save();
+
+        return $comment;
+    }
+
 
     function findCommentsByThread($thread, $sorter, $displayDepth)
     {
-        $phql = 'SELECT * FROM Eva\EvaComment\Entities\Comments AS c WHERE c.threadId = :threadId: ORDER BY c.createdAt DESC';
+        $phql = 'SELECT * FROM Eva\EvaComment\Entities\Comments AS c
+                WHERE c.threadId = :threadId: AND c.status = "approved" ORDER BY c.createdAt DESC';
 
         $manager = $this->getModelsManager();
         $comments = $manager->executeQuery($phql, array('threadId' => $thread->id));
@@ -134,7 +147,7 @@ class CommentManager extends BaseModel
     function findCommentTreeByThread($thread, $sorter, $displayDepth)
     {
         $phql = 'SELECT * FROM Eva\EvaComment\Entities\Comments AS c
-                WHERE c.threadId = :threadId: AND c.rootId = 0 ORDER BY c.createdAt DESC';
+                WHERE c.threadId = :threadId: AND c.rootId = 0 AND c.status = "approved" ORDER BY c.createdAt DESC';
 
         $manager = $this->getModelsManager();
         $comments = $manager->executeQuery($phql, array('threadId' => $thread->id));

@@ -113,13 +113,19 @@ class Comments extends BaseModel
      *
      * @var integer
      */
+    public $updatedAt;
+
+    /**
+     *
+     * @var integer
+     */
     public $createdAt;
 
     public $childrenComments;
 
     public function getChildrenComments()
     {
-        $phql = 'SELECT * FROM Eva\EvaComment\Entities\Comments AS c WHERE c.rootId = :rootId:';
+        $phql = 'SELECT * FROM Eva\EvaComment\Entities\Comments AS c WHERE c.rootId = :rootId: AND c.status = "approved"';
 
         $manager = $this->getModelsManager();
         $comments = $manager->executeQuery($phql,array('rootId'=>$this->id));
@@ -151,5 +157,6 @@ class Comments extends BaseModel
         $this->depth = 0;
         $this->status = 'approved';
         $this->createdAt = time();
+        $this->updatedAt = time();
     }
 }

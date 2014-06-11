@@ -5,5 +5,7 @@ use Eva\EvaEngine\Engine;
 
 $engine = new Engine(__DIR__ . '/..');
 
-$engine->loadModules(include __DIR__ . '/../config/modules.php');
-$engine->bootstrap()->run();
+$engine
+    ->loadModules(include __DIR__ . '/../config/modules.php')
+    ->bootstrap()
+    ->run();
