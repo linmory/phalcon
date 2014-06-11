@@ -2322,6 +2322,12 @@ td.datepickerSpecial.datepickerSelected a {
 #main .main-title.type1 {
   border-bottom-color: #1e1e1e;
 }
+#main .main-title .more {
+  float: right;
+  font-size: 12px;
+  font-weight: normal;
+  cursor: pointer;
+}
 #main .main-more {
   float: right;
   line-height: 30px;
@@ -2408,6 +2414,12 @@ td.datepickerSpecial.datepickerSelected a {
   line-height: 16px;
   margin-bottom: 10px;
   font-weight: normal;
+}
+#main .topnews.list.type1 > .title .more {
+  float: right;
+  font-size: 12px;
+  font-weight: normal;
+  cursor: pointer;
 }
 #main .topnews.list.type1 > .item > .link {
   height: 32px;
