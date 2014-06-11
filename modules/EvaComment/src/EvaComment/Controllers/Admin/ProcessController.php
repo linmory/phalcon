@@ -32,15 +32,19 @@ class ProcessController extends ControllerBase implements JsonControllerInterfac
         }
 
         $id = $this->dispatcher->getParam('id');
-        $post =  Models\Post::findFirst($id);
+        $status = $this->request->getPut('status');
+
+        $commentManager =  new Models\CommentManager();
+
+        $comment = $commentManager->findCommentById($id);
+
         try {
-            $post->status = $this->request->getPut('status');
-            $post->save();
+            $commentManager->updateCommentStatus($comment,$status);
         } catch (\Exception $e) {
-            return $this->displayExceptionForJson($e, $post->getMessages());
+            return $this->displayExceptionForJson($e, $comment->getMessages());
         }
 
-        return $this->response->setJsonContent($post);
+        return $this->response->setJsonContent($comment);
     }
 
     public function batchAction()
@@ -55,22 +59,27 @@ class ProcessController extends ControllerBase implements JsonControllerInterfac
         }
 
         $status = $this->request->getPut('status');
-        $posts = array();
+        $comments = array();
+
+        $commentManager =  new Models\CommentManager();
+
 
         try {
             foreach ($idArray as $id) {
-                $post =  Models\Post::findFirst($id);
-                if ($post) {
-                    $post->status = $status;
-                    $post->save();
-                    $posts[] = $post;
+
+                $comment = $commentManager->findCommentById($id);
+
+                if ($comment) {
+                    $commentManager->updateCommentStatus($comment,$status);
+
+                    $comments[] = $comment;
                 }
             }
         } catch (\Exception $e) {
-            return $this->displayExceptionForJson($e, $post->getMessages());
+            return $this->displayExceptionForJson($e, $comment->getMessages());
         }
 
-        return $this->response->setJsonContent($posts);
+        return $this->response->setJsonContent($comments);
     }
 
 

@@ -56,12 +56,20 @@ class Threads extends BaseModel
      */
     public $channel;
 
+
+    /**
+     *
+     * @var integer
+     */
+    public $lastEditAt;
+
     public function onConstruct()
     {
         $this->title = '';
         $this->isCommentAble = '';
         $this->numComments = 0;
         $this->lastCommentAt = time();
+        $this->lastEditAt = time();
         $this->channel = 0;
     }
 

@@ -73,7 +73,7 @@ class ThreadController extends ControllerBase
             }
         }
 
-        $cacheKey = $uniqueKey.'###'.$thread->numComments;
+        $cacheKey = $uniqueKey.'###'.$thread->numComments.$thread->lastEditAt;
 
         $this->view->cache(
             array(
