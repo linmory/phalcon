@@ -276,11 +276,11 @@ class Engine
             return $self->diViewCache();
         });
 
-        $di->set('modelCache', function() use ($di) {
+        $di->set('modelCache', function() use ($self) {
             return $self->diModelCache();
         });
 
-        $di->set('apiCache', function() use ($di) {
+        $di->set('apiCache', function() use ($self) {
             return $self->diApiCache();
         });
 
