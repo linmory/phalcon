@@ -66,7 +66,7 @@ class Engine
 
     public function getEnvironment()
     {
-        return $this->environment = empty($_SERVER['APPLICATION_ENV']) ? 'development' : $_SERVER['APPLICATION_ENV'];
+        return $this->environment;
     }
 
     public function setEnvironment($environment)
@@ -139,7 +139,7 @@ class Engine
     {
         if($cacheFile && $fh = fopen($cacheFile, 'w')) {
             if(true === $serialize) {
-                fwrite($fh, serialize($content));
+                fwrite($fh, "<?php return '" . serialize($content) . "';");
             } else {
                 fwrite($fh, '<?php return ' . var_export($content, true) . ';');
             }
@@ -405,8 +405,8 @@ class Engine
         $di = $this->getDI();
         $cachePrefix = $this->getAppName();
         $cacheFile = $this->getConfigPath() . "/_cache.$cachePrefix.router.php";
-        if($cache = $this->readCache($cacheFile, true)) {
-            return $cache;
+        if($router = $this->readCache($cacheFile, true)) {
+            return $router;
         }
 
         $moduleManager = $di->getModuleManager();
@@ -437,6 +437,7 @@ class Engine
         }
 
         if(!$di->getConfig()->debug) {
+            $this->writeCache($cacheFile, $router, true);
         }
         return $router;
     }
@@ -742,5 +743,6 @@ class Engine
     {
         $this->appRoot = $appRoot ? $appRoot : __DIR__;
         $this->appName = empty($_SERVER['APPLICATION_NAME']) ? $appName : $_SERVER['APPLICATION_NAME'];
+        $this->environment = empty($_SERVER['APPLICATION_ENV']) ? 'development' : $_SERVER['APPLICATION_ENV'];
     }
 }
