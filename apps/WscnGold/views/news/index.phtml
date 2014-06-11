@@ -15,7 +15,7 @@
                 </ul>
                 <?endif?>
                 <ul class="topnews list type1 right">
-                    <li class="title"><h2><a href="/news/list?cid=1">头条新闻</a></h2></li>
+                    <li class="title"><h2><a href="/news/list?cid=1">头条新闻</a><a class="more" href="/news/list?cid=1">更多 &gt;&gt;</a></h2></li>
                     <?foreach($posts as $key => $post):?>
                     <?if($key > 0):?>
                     <li class="item"><a class="link" href="/post/<?=$post->slug?>"><?=$this->escaper->escapeHtmlAttr($post->title)?> <span class="time"><?=$this->tag->datetime($post->createdAt, 'H:m')?></span></a></li>
@@ -24,7 +24,7 @@
                 </ul>
             </div>
             <div class="row">
-                <h2 class="main-title type1"><a href="/news/list?cid=2">编辑推荐</a></h2>
+                <h2 class="main-title type1"><a href="/news/list?cid=2">编辑推荐</a><a class="more" href="/news/list?cid=2">更多 &gt;&gt;</a></h2>
                 <?$pager = $this->tag->component('post', array('status' => 'published', 'cid' => 2 ,'limit' => 3));$posts = $pager->items?>
                 <ul class="recommend-news list">
                     <?foreach($posts as $post):?>
