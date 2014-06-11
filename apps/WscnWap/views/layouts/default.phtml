@@ -82,10 +82,83 @@
         .news-info .meta>.item {
                 margin-right: 1em;
         }
+		
+		#download-app {
+            display: none;
+            font-family: Verdana, Tahoma, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+            position: fixed;
+            z-index: 999;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding-top: 60px;
+            background-color: #fff;
+            text-align: center;
+            font-size: 14px;
+            color: #999;    
+        }
+        #download-app .logo {
+            width: 42px;
+            height: 42px;
+        }
+        #download-app h3 {
+            font-weight: normal;
+            font-size: 16px;
+            margin-top: 15px;
+            margin-bottom: 30px;
+        }
+        #download-app p {
+            margin: 0;
+            padding: 0;
+            line-height: 2em;
+        }
+        #download-app .button {
+            color: #444;
+            display: block;
+            position: relative;
+            margin: 20px auto;
+            background-color: #ddeafe;
+            border-color: #ccc;
+            line-height: 40px;
+            width: 150px;
+            height: 40px;
+            border-radius: 5px;
+            padding: 0 15px;
+        }
+        #download-app .button .icon {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 15px;
+            margin: auto 0;
+        }
+        #download-app .button .text {
+            display: block;
+            float: right;
+            font-size: 16px;
+        }
     </style>
 
 </head>
 <body>
+
+<div id="download-app">
+        <img src="http://wallstreetcn.com/sites/all/themes/wallstcnmobile/img/logo.png" alt="" class="logo">
+        <h3>华尔街见闻提醒您</h3>
+        <p>
+            强烈推荐华尔街见闻App<br/>
+            为移动而生、第一时间知道金融市场异动
+        </p>
+        <a class="button" href="javascript:void(0);" onclick="closeDownloadApp();" data-action="close">
+            <img src="http://wallstreetcn.com/sites/all/themes/wallstcnmobile/img/phone.png" width="15" height="28" alt="" class="icon">
+            <span class="text">进入移动版网站</span>
+        </a>
+        <a class="button" href="http://wallstreetcn.com/downloadapp.html">
+            <img src="http://wallstreetcn.com/sites/all/themes/wallstcnmobile/img/app.png" width="23" height="23" alt="" class="icon">
+            <span class="text">App客户端下载</span>
+        </a>
+    </div>
 
 <div style="width: 100% !important; height: 100% !important;">
 	<div class="toolbar">
@@ -95,6 +168,19 @@
     <?=$this->getContent()?>
 
 <script src="http://cdn.static.wallstreetcn.com/js/jquery-1.10.2.min.js"></script>
+<script src="http://cdn.static.wallstreetcn.com/js/store.min.js"></script>
+<script type="text/javascript">
+    function closeDownloadApp() {
+            document.getElementById('download-app').style.display = "none";
+    } 
+</script>
+
+<script type="text/javascript">
+	if (store.get('hasShowAppPage')  == null) {
+        document.getElementById('download-app').style.display = "block";
+        store.set('hasShowAppPage',"true");
+    }
+</script>
 <script type="text/javascript">
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-19303398-2']);
@@ -118,4 +204,3 @@
 	</script>
 </body>
 </html>
-

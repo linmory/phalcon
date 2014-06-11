@@ -66,7 +66,7 @@ class Engine
 
     public function getEnvironment()
     {
-        return $this->environment = getenv('APPLICATION_ENV') ?: 'development';
+        return $this->environment = empty($_SERVER['APPLICATION_ENV']) ? 'development' : $_SERVER['APPLICATION_ENV'];
     }
 
     public function setEnvironment($environment)
@@ -127,18 +127,22 @@ class Engine
     }
 
 
-    public function readCache($cacheFile)
+    public function readCache($cacheFile, $serialize = false)
     {
         if(file_exists($cacheFile) && $cache = include($cacheFile)) {
-            return $cache;
+            return true === $serialize ? unserialize($cache) : $cache;
         }
         return null;
     }
 
-    public function writeCache($cacheFile, array $content)
+    public function writeCache($cacheFile, $content, $serialize = false)
     {
         if($cacheFile && $fh = fopen($cacheFile, 'w')) {
-            fwrite($fh, '<?php return ' . var_export($content, true) . ';');
+            if(true === $serialize) {
+                fwrite($fh, serialize($content));
+            } else {
+                fwrite($fh, '<?php return ' . var_export($content, true) . ';');
+            }
             fclose($fh);
             return true;
         }
@@ -401,6 +405,9 @@ class Engine
         $di = $this->getDI();
         $cachePrefix = $this->getAppName();
         $cacheFile = $this->getConfigPath() . "/_cache.$cachePrefix.router.php";
+        if($cache = $this->readCache($cacheFile, true)) {
+            return $cache;
+        }
 
         $moduleManager = $di->getModuleManager();
         $config = new Config();
@@ -427,6 +434,9 @@ class Engine
             } else {
                 $router->add($url, $route);
             }
+        }
+
+        if(!$di->getConfig()->debug) {
         }
         return $router;
     }
@@ -731,6 +741,6 @@ class Engine
     public function __construct($appRoot = null, $appName = 'evaengine')
     {
         $this->appRoot = $appRoot ? $appRoot : __DIR__;
-        $this->appName = $appName;
+        $this->appName = empty($_SERVER['APPLICATION_NAME']) ? $appName : $_SERVER['APPLICATION_NAME'];
     }
 }
