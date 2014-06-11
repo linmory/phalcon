@@ -14,8 +14,6 @@ use Phalcon\Mvc\Dispatcher;
 use Eva\EvaEngine\Mvc\View;
 use Eva\EvaEngine\Mvc\Model\Manager as ModelManager;
 
-use Eva\EvaEngine\ModuleManager;
-
 class Engine
 {
     protected $appRoot;
@@ -94,7 +92,7 @@ class Engine
 
     public function loadModules(array $moduleSettings)
     {
-        $moduleManager = $this->getDI()->get('moduleManager');
+        $moduleManager = $this->getDI()->getModuleManager();
         $moduleManager
             ->setDefaultPath($this->getModulesPath())
             ->setCachePath($this->getConfigPath())
@@ -143,8 +141,10 @@ class Engine
         ***********************************/
 
         //call loadmodules will overwrite this
-        $di->set('moduleManager', function () {
-            return new ModuleManager();
+        $di->set('moduleManager', function () use ($di) {
+            $moduleManager = new ModuleManager();
+            $moduleManager->setEventsManager($di->getEventsManager());
+            return $moduleManager;
         }, true);
 
         //System global events manager
@@ -183,9 +183,8 @@ class Engine
             return $view;
         });
 
-        $di->set('session', function ($self) {
+        $di->set('session', function () use ($self) {
             return $self->diSession();
-
         });
 
         /**********************************
@@ -250,24 +249,22 @@ class Engine
         DI initialize for helpers
         ***********************************/
         $di->set('url', function () use ($di) {
-            $config = $di->get('config');
+            $config = $di->getConfig();
             $url = new UrlResolver();
             $url->setBaseUri($config->baseUri);
             return $url;
         });
 
-        $di->set('escaper', function () {
-            return new \Phalcon\Escaper();
-        });
+        $di->set('escaper', 'Phalcon\Escaper');
 
         $di->set('tag', function () use ($di) {
             \Eva\EvaEngine\Tag::setDi($di);
             return new \Eva\EvaEngine\Tag();
         });
 
-        $di->set('placeholder', function(){
-            return new \Eva\EvaEngine\View\Helper\Placeholder();
-        }, true);
+        $di->set('flash', 'Phalcon\Flash\Session');
+
+        $di->set('placeholder', 'Eva\EvaEngine\View\Helper\Placeholder');
 
         $di->set('cookies', function () {
             $cookies = new \Phalcon\Http\Response\Cookies();
@@ -275,14 +272,8 @@ class Engine
             return $cookies;
         });
 
-        $di->set('flash', function () {
-            $flash = new \Phalcon\Flash\Session();
-            return $flash;
-        });
-
-
         $di->set('translate', function () use ($di) {
-            $config = $di->get('config');
+            $config = $di->getConfig();
             $file = $config->translate->path . $config->translate->forceLang . '.csv';
             if (false === file_exists($file)) {
                 $file = $config->translate->path . 'empty.csv';
@@ -418,7 +409,7 @@ class Engine
     public function diDbMaster()
     {
         $config = $this->getDI()->getConfig();
-        if(!isset($config->dbAdapter->master->adapter) || $config->dbAdapter->master) {
+        if(!isset($config->dbAdapter->master->adapter) || !$config->dbAdapter->master) {
             throw new Exception\InvalidArgumentException(sprintf('No DB Master options found'));
         }
         return $this->diDbAdapter($config->dbAdapter->master->adapter, $config->dbAdapter->master->toArray());

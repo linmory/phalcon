@@ -3,8 +3,10 @@
 namespace Eva\EvaEngine;
 
 use Phalcon\Loader;
+use Phalcon\Events\EventsAwareInterface;
+use Phalcon\Events\ManagerInterface;
 
-class ModuleManager
+class ModuleManager implements EventsAwareInterface
 {
     protected $modules = array();
 
@@ -62,8 +64,16 @@ class ModuleManager
         return $this->eventsManager = $eventsManager;
     }
 
+    public function getModules()
+    {
+        return $this->modules;
+    }
+
     public function loadModules(array $moduleSettings, $cachePrefix = 'default')
     {
+        //Trigger Event
+        $this->getEventsManager()->fire('module:beforeLoadModule', $this);
+
         $cachePath = $this->getCachePath();
         $cacheFile = $cachePath ? $cachePath . "/_cache.$cachePrefix.module.php" : '';
         $loader = $this->getLoader();
@@ -72,6 +82,9 @@ class ModuleManager
             $loader->registerNamespaces($cache['namespaces'])->register();
             $loader->registerClasses($cache['classes'])->register();
             $this->modules = $cache['modules'];
+
+            //Trigger Event
+            $this->getEventsManager()->fire('module:afterLoadModule', $this);
             return $this;
         }
 
@@ -143,18 +156,15 @@ class ModuleManager
             fclose($fh);
         }
 
+        //Trigger Event
+        $this->getEventsManager()->fire('module:afterLoadModule', $this);
         return $this;
-    }
-
-    public function getModules()
-    {
-        return $this->modules;
     }
 
     public function getModulePath($moduleName)
     {
         $modules = $this->getModules();
-        if (isset($modules[$moduleName]['dir']) && file_exists($modules[$moduleName]['dir'])) {
+        if (!empty($modules[$moduleName]['dir']) && file_exists($modules[$moduleName]['dir'])) {
             return $modules[$moduleName]['dir'];
         }
         return '';
@@ -163,7 +173,7 @@ class ModuleManager
     public function getModuleConfig($moduleName)
     {
         $modules = $this->getModules();
-        if (isset($modules[$moduleName]['moduleConfig']) && file_exists($modules[$moduleName]['moduleConfig'])) {
+        if (!empty($modules[$moduleName]['moduleConfig']) && file_exists($modules[$moduleName]['moduleConfig'])) {
             return include $modules[$moduleName]['moduleConfig'];
         }
         return array();
@@ -172,7 +182,7 @@ class ModuleManager
     public function getModuleRoutesFrontend($moduleName)
     {
         $modules = $this->getModules();
-        if (isset($modules[$moduleName]['routesFrontend']) &&  $modules[$moduleName]['routesFrontend'] && file_exists($modules[$moduleName]['routesFrontend'])) {
+        if (!empty($modules[$moduleName]['routesFrontend']) && file_exists($modules[$moduleName]['routesFrontend'])) {
             return include $modules[$moduleName]['routesFrontend'];
         }
         return array();
@@ -181,7 +191,7 @@ class ModuleManager
     public function getModuleRoutesBackend($moduleName)
     {
         $modules = $this->getModules();
-        if (isset($modules[$moduleName]['routesBackend']) && $modules[$moduleName]['routesBackend'] && file_exists($modules[$moduleName]['routesBackend'])) {
+        if (!empty($modules[$moduleName]['routesBackend']) && file_exists($modules[$moduleName]['routesBackend'])) {
             return include $modules[$moduleName]['routesBackend'];
         }
         return array();
@@ -190,7 +200,7 @@ class ModuleManager
     public function getModuleListener($moduleName)
     {
         $modules = $this->getModules();
-        if (isset($modules[$moduleName]['listener']) && $modules[$moduleName]['listener'] && file_exists($modules[$moduleName]['listener'])) {
+        if (!empty($modules[$moduleName]['listener']) && file_exists($modules[$moduleName]['listener'])) {
             return include $modules[$moduleName]['listener'];
         }
         return array();
