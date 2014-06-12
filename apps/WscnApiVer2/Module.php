@@ -3,16 +3,21 @@
 namespace WscnApiVer2;
 
 use Phalcon\Loader;
+use Phalcon\Mvc\Dispatcher;
 use Phalcon\Mvc\ModuleDefinitionInterface;
-use Eva\EvaEngine\Error\ErrorHandler;
+use Eva\EvaEngine\Module\StandardInterface;
 
-class Module implements ModuleDefinitionInterface
+class Module implements ModuleDefinitionInterface, StandardInterface
 {
     public static function registerGlobalAutoloaders()
     {
         return array(
             'WscnApiVer2' => __DIR__ . '/src/WscnApiVer2',
         );
+    }
+
+    public static function registerGlobalEventListeners()
+    {
     }
 
     /**
@@ -29,13 +34,8 @@ class Module implements ModuleDefinitionInterface
      */
     public function registerServices($di)
     {
-        $di['dispatcher'] = function () {
-            $dispatcher = new \Phalcon\Mvc\Dispatcher();
-            $dispatcher->setDefaultNamespace('WscnApiVer2\Controllers');
-
-            return $dispatcher;
-        };
-
+        $dispatcher = $di->getDispatcher();
+        $dispatcher->setDefaultNamespace('WscnApiVer2\Controllers');
         ErrorHandler::setErrorController('Jsonerror');
     }
 

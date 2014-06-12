@@ -18,6 +18,7 @@ use Phalcon\Events\Manager as EventsManager;
 use Phalcon\Logger\Adapter\File as FileLogger;
 use Phalcon\Mvc\Dispatcher;
 use Eva\EvaEngine\Mvc\View;
+use Eva\EvaEngine\Module\Manager as ModuleManager;
 use Eva\EvaEngine\Mvc\Model\Manager as ModelManager;
 use Eva\EvaEngine\Tag;
 
@@ -187,6 +188,12 @@ class Engine
         return $this;
     }
 
+    public function attachModuleEvents()
+    {
+
+        return $this;
+    }
+
     public function setDI(\Phalcon\DiInterface $di)
     {
         $this->di = $di;
@@ -224,7 +231,9 @@ class Engine
 
         //System global events manager
         $di->set('eventsManager', function () {
-            return new EventsManager();
+            $eventsManager = new EventsManager();
+            $eventsManager->enablePriorities(true);
+            return $eventsManager;
         }, true);
 
         $di->set('config', function () use ($self) {

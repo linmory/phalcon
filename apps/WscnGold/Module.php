@@ -3,16 +3,22 @@
 namespace WscnGold;
 
 use Phalcon\Loader;
-use Eva\EvaEngine\Mvc\View;
+use Phalcon\Mvc\Dispatcher;
 use Phalcon\Mvc\ModuleDefinitionInterface;
+use Eva\EvaEngine\Module\StandardInterface;
+use Eva\EvaEngine\Mvc\View;
 
-class Module implements ModuleDefinitionInterface
+class Module implements ModuleDefinitionInterface, StandardInterface
 {
     public static function registerGlobalAutoloaders()
     {
         return array(
             'WscnGold' => __DIR__ . '/src/WscnGold',
         );
+    }
+
+    public static function registerGlobalEventListeners()
+    {
     }
 
     /**
@@ -29,13 +35,8 @@ class Module implements ModuleDefinitionInterface
      */
     public function registerServices($di)
     {
-        $di['dispatcher'] = function () {
-            $dispatcher = new \Phalcon\Mvc\Dispatcher();
-            $dispatcher->setDefaultNamespace('WscnGold\Controllers');
-
-            return $dispatcher;
-        };
-
+        $dispatcher = $di->getDispatcher();
+        $dispatcher->setDefaultNamespace('WscnGold\Controllers');
         View::registerComponent('post', 'Eva\EvaBlog\Components\Post');
     }
 

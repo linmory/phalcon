@@ -1,6 +1,6 @@
 <?php
 
-namespace Eva\EvaOAuthServer;
+namespace Eva\EvaPermission;
 
 use Phalcon\Loader;
 use Phalcon\Mvc\Dispatcher;
@@ -12,12 +12,15 @@ class Module implements ModuleDefinitionInterface, StandardInterface
     public static function registerGlobalAutoloaders()
     {
         return array(
-            'Eva\EvaOAuthServer' => __DIR__ . '/src/EvaOAuthServer',
+            'Eva\EvaPermission' => __DIR__ . '/src/EvaPermission',
         );
     }
 
     public static function registerGlobalEventListeners()
     {
+        return array(
+            'dispatch' => 'Eva\EvaPermission\Events\DispatchListener',
+        );
     }
 
     /**
@@ -35,7 +38,7 @@ class Module implements ModuleDefinitionInterface, StandardInterface
     public function registerServices($di)
     {
         $dispatcher = $di->getDispatcher();
-        $dispatcher->setDefaultNamespace('Eva\EvaOAuthServer\Controllers');
+        $dispatcher->setDefaultNamespace('Eva\EvaPermission\Controllers');
     }
 
 }

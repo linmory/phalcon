@@ -1,13 +1,13 @@
 <?php
 
-namespace Eva\EvaEngine;
+namespace Eva\EvaEngine\Module;
 
 use Phalcon\Loader;
 use Phalcon\Events\EventsAwareInterface;
 use Phalcon\Events\ManagerInterface;
 use Phalcon\Events\Manager as EventsManager;
 
-class ModuleManager implements EventsAwareInterface
+class Manager implements EventsAwareInterface
 {
     protected $modules = array();
 
@@ -113,17 +113,15 @@ class ModuleManager implements EventsAwareInterface
             'className' => '',
             'path' => '',  //Module bootstrap file path
             'dir' => '', //Module source codes dir
-            'moduleConfig' => '',
-            'routesFrontend' => '',
-            'routesBackend' => '',
-            'listener' => '',
-            'namespaces' => '',
-            'translate' => '',
+            'moduleConfig' => '', //module config file path
+            'routesFrontend' => '', //module router frontend path
+            'routesBackend' => '', //module router backend path
+            'listeners' => '', //module listeners list array
+            'translatePath' => false,
         );
 
         $modules = array();
         $classes = array();
-        $namespaces = array();
         $modulesPath = $this->getDefaultPath();
         foreach ($moduleSettings as $key => $module) {
             if (is_array($module)) {
@@ -153,21 +151,24 @@ class ModuleManager implements EventsAwareInterface
             $module['moduleConfig'] = false === $module['moduleConfig'] || $module['moduleConfig'] ? $module['moduleConfig'] : $module['dir'] . '/config/config.php';
             $module['routesBackend'] = false === $module['routesBackend'] || $module['routesBackend'] ? $module['routesBackend'] : $module['dir'] . '/config/routes.backend.php';
             $module['routesFrontend'] = false === $module['routesFrontend'] || $module['routesFrontend'] ? $module['routesFrontend'] : $module['dir'] . '/config/routes.frontend.php';
-            $module['listener'] = false === $module['listener'] || $module['listener'] ? $module['listener'] : $module['dir'] . '/Listener.php';
+            $module['translatePath'] = false === $module['translatePath'] || $module['translatePath'] ? $module['translatePath'] : $module['dir'] . '/languages';
 
             $classes[$module['className']] = $module['path'];
             $modules[$moduleKey] = $module;
         }
 
-
+        $namespaces = array();
+        $listeners = array();
         $loader->registerClasses($classes)->register();
         foreach($modules as $key => $module) {
-            if(method_exists($module['className'], 'registerGlobalAutoloaders')) {
-                $namespace = $module['className']::registerGlobalAutoloaders();
-                if(is_array($namespace)) {
-                    $namespaces += $namespace;
-                }
+            if(!(new $module['className'] instanceof StandardInterface)) {
+                continue;
             }
+            $namespace = $module['className']::registerGlobalAutoloaders();
+            if(is_array($namespace)) {
+                $namespaces += $namespace;
+            }
+            $modules[$key]['listeners'] = $module['className']::registerGlobalEventListeners();
         }
         $loader->registerNamespaces($namespaces)->register();
 
@@ -221,11 +222,11 @@ class ModuleManager implements EventsAwareInterface
         return array();
     }
 
-    public function getModuleListener($moduleName)
+    public function getModuleListeners($moduleName)
     {
         $modules = $this->getModules();
-        if (!empty($modules[$moduleName]['listener']) && file_exists($modules[$moduleName]['listener'])) {
-            return include $modules[$moduleName]['listener'];
+        if (!empty($modules[$moduleName]['listeners'])) {
+            return $modules[$moduleName]['listeners'];
         }
         return array();
     }

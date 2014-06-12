@@ -7,10 +7,7 @@ return array(
     'EvaBlog',
     'EvaFileSystem',
     'EvaComment',
-    'Frontend' => array(
-        'className' => 'Eva\Frontend\Module',
-        'path' => __DIR__ . '/../apps/Frontend/Module.php',
-    ),
+    'EvaPermission',
     'WscnGold' => array(
         'className' => 'WscnGold\Module',
         'path' => __DIR__ . '/../apps/WscnGold/Module.php'
