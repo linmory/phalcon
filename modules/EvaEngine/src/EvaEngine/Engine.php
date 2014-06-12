@@ -14,6 +14,7 @@ use Phalcon\DI\FactoryDefault;
 use Phalcon\Config;
 use Phalcon\Loader;
 use Phalcon\Mvc\Application;
+use Phalcon\Debug;
 use Phalcon\Events\Manager as EventsManager;
 use Phalcon\Logger\Adapter\File as FileLogger;
 use Phalcon\Mvc\Dispatcher;
@@ -64,6 +65,8 @@ class Engine
     protected $cacheEnable = false;
 
     protected $environment; //development | test | production
+
+    protected $debugger;
 
     public function getEnvironment()
     {
@@ -150,6 +153,18 @@ class Engine
         return false;
     }
 
+    public function getDebugger()
+    {
+        if($this->debugger) {
+            return $this->debugger;
+        }
+
+        $debugger = new Debug();
+        $debugger->setShowFileFragment(true);
+        $debugger->listen(true, true);
+        return $this->debug = $debugger;
+    }
+
     public function getApplication()
     {
         if ($this->application) {
@@ -190,7 +205,42 @@ class Engine
 
     public function attachModuleEvents()
     {
+        $di = $this->getDI();
+        $cachePrefix = $this->getAppName();
+        $cacheFile = $this->getConfigPath() . "/_cache.$cachePrefix.events.php";
+        $listeners = $this->readCache($cacheFile);
 
+        if(!$listeners) {
+            $moduleManager = $this->getDI()->getModuleManager();
+            $modules = $moduleManager->getModules();
+            $listeners = array();
+            foreach ($modules as $moduleName => $module) {
+                $moduleListeners = $moduleManager->getModuleListeners($moduleName);
+                if($moduleListeners) {
+                    $listeners[$moduleName] = $moduleListeners;
+                }
+            }
+        }
+
+        if(!$listeners) {
+            return $this;
+        }
+
+        $eventsManager = $this->getDI()->getEventsManager();
+        foreach($listeners as $moduleName => $moduleListeners) {
+            foreach($moduleListeners as $eventType => $listener) {
+                $eventsManager->attach($eventType, new $listener);
+            }
+        }
+
+        if($di->getConfig()->debug) {
+            $debugger = $this->getDebugger();
+            $debugger->debugVar($listeners, 'events');
+        }
+
+        if(!$di->getConfig()->debug && $listeners) {
+            $this->writeCache($cacheFile, $listeners);
+        }
         return $this;
     }
 
@@ -662,11 +712,11 @@ class Engine
     public function bootstrap()
     {
         if ($this->getDI()->getConfig()->debug) {
-            $debugger = new \Phalcon\Debug();
+            $debugger = $this->getDebugger();
             $debugger->debugVar($this->getApplication()->getModules(), 'modules');
-            $debugger->listen(true, true);
         }
         $this->getApplication()->setDI($this->getDI());
+        $this->attachModuleEvents();
         //Error Handler must run before router start
         $this->initErrorHandler(new Error\ErrorHandler);
         return $this;
@@ -698,8 +748,7 @@ class Engine
 
         $debug = $di->get('config')->debug;
         if ($debug) {
-            $debugger = new \Phalcon\Debug();
-            $debugger->listen();
+            $debugger = $this->getDebugger();
         }
 
         //Roter
