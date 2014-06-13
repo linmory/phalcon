@@ -530,41 +530,34 @@
             result.date = mt.format(root.config.dateFormat);
             result.utm  = mt.unix();
             result.trend = '';
-            if (result['actual']) {
-                if (result['forecast']) {
-                    if (parseFloat(result['actual']) > parseFloat(result['forecast'])) {
-                        result.trend = 'up';
-                    } else if (parseFloat(result['actual']) < parseFloat(result['forecast'])) {
-                        result.trend = 'down';
-                    }
-                } else {
-                    result['forecast'] = '- -';
-                    if (result['previous']) {
-                        if (parseFloat(result['actual']) > parseFloat(result['previous'])) {
+            //
+            if (result['calendarType'] === 'FD') {
+                if (result['actual'] && result['actual'] !== '&nbsp;') {
+                    if (result['forecast']  && result['forecast'] !== '&nbsp;') {
+                        if (parseFloat(result['actual']) > parseFloat(result['forecast'])) {
                             result.trend = 'up';
-                        } else if (parseFloat(result['actual']) < parseFloat(result['previous'])) {
+                        } else if (parseFloat(result['actual']) < parseFloat(result['forecast'])) {
                             result.trend = 'down';
                         }
+                    } else {
+                        result['forecast'] = '- -';
+                        if (result['previous']) {
+                            if (parseFloat(result['actual']) > parseFloat(result['previous'])) {
+                                result.trend = 'up';
+                            } else if (parseFloat(result['actual']) < parseFloat(result['previous'])) {
+                                result.trend = 'down';
+                            }
+                        }
                     }
-                }
-            } else {
-                result['actual'] = '- -';
-            }
-            /*
-            if (result['actual'] && result['forecast']) {
-                if (parseFloat(result['actual']) > parseFloat(result['forecast'])) {
-                    result.trend = 'up';
-                } else if (parseFloat(result['actual']) < parseFloat(result['forecast'])) {
-                    result.trend = 'down';
+                } else {
+                    result['actual'] = '- -';
+                    //todo
+                    if (mt.valueOf() < new Date().getTime()) {
+                        root.refresh_price_param += '_' + result.cid;
+                    }
                 }
             }
             //
-            if (!result['forecast']) {
-                result['forecast'] = '- -';
-            }
-            */
-            //importance
-            //.icon.star
             switch (parseInt(result['importance'])) {
                 case 1:
                     result['stars'] = '<div class="icon star active"></div><div class="icon star"></div><div class="icon star"></div>';
