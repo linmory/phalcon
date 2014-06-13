@@ -3,18 +3,21 @@
 namespace Eva\EvaCore;
 
 use Phalcon\Loader;
+use Phalcon\Mvc\Dispatcher;
 use Phalcon\Mvc\ModuleDefinitionInterface;
+use Eva\EvaEngine\Module\StandardInterface;
 
-class Module implements ModuleDefinitionInterface
+class Module implements ModuleDefinitionInterface, StandardInterface
 {
-
-    public static $moduleName = 'EvaCore';
-
     public static function registerGlobalAutoloaders()
     {
         return array(
             'Eva\EvaCore' => __DIR__ . '/src/EvaCore',
         );
+    }
+
+    public static function registerGlobalEventListeners()
+    {
     }
 
     /**
@@ -31,11 +34,7 @@ class Module implements ModuleDefinitionInterface
      */
     public function registerServices($di)
     {
-        $di['dispatcher'] = function () {
-            $dispatcher = new \Phalcon\Mvc\Dispatcher();
-            $dispatcher->setDefaultNamespace('Eva\EvaCore\Controllers');
-
-            return $dispatcher;
-        };
+        $dispatcher = $di->getDispatcher();
+        $dispatcher->setDefaultNamespace('Eva\EvaCore\Controllers');
     }
 }

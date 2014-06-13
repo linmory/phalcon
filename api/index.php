@@ -5,5 +5,7 @@ use Eva\EvaEngine\Engine;
 
 $engine = new Engine(__DIR__ . '/..', 'api');
 
-$engine->loadModules(include __DIR__ . '/../config/modules.api.php');
-$engine->bootstrap()->run();
+$engine
+    ->loadModules(include __DIR__ . '/../config/modules.' . $engine->getAppName() . '.php')
+    ->bootstrap()
+    ->run();

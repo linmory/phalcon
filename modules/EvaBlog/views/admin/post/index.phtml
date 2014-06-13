@@ -83,7 +83,7 @@
 
                     </div>
                 </div>
-                <table class="table table-striped table-bordered table-hover dataTable  table-sortable" id="post-grid"  data-sortable-key="order" data-sortable-default="-created_at">
+                <table class="table table-striped table-bordered table-hover dataTable  table-sortable" id="post-grid" data-sortable-key="order" data-sortable-default="-created_at">
                     <thead>
                         <tr>
                             <th class="center">
@@ -97,6 +97,9 @@
                             </th>
                             <th>Title</th>
                             <th class="hidden-480">Status</th>
+                            <th>
+                                <a href="<?=$this->tag->uri('/admin/post', $pager->query)?>" class="sortable-link" data-sortable-value="sort_order" data-sortable-default="-sort_order">Order</a>
+                            </th>
                             <th>User</th>
                             <th>
                                 <a href="<?=$this->tag->uri('/admin/post', $pager->query)?>" class="sortable-link" data-sortable-value="created_at" data-sortable-default="-created_at">
@@ -131,6 +134,9 @@
                                     'published' => 'label-success',
                                 )?>
                                 <span class="label label-sm <?=$status[$item->status]?>"><?=$item->status?></span>
+                            </td>
+                            <td>
+                                <input class="form-control input-mini ajax-field-edit" value="<?=$item->sortOrder?>" data-name="sortOrder" date-method="put" data-form-action="/admin/post/process/sort/<?=$item->id?>" data-callback="input.parent().addClass('has-success')" />
                             </td>
                             <td><?=$item->user ? $item->user->username : ''?></td>
                             <td><?=$this->tag->datetime($item->createdAt)?></td>

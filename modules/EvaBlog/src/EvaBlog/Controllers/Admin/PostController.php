@@ -54,7 +54,8 @@ class PostController extends ControllerBase
     public function createAction()
     {
         $form = new Forms\PostForm();
-        $form->setModel(new Models\Post());
+        $post = new Models\Post();
+        $form->setModel($post);
         $form->addForm('text', 'Eva\EvaBlog\Forms\TextForm');
         $this->view->setVar('form', $form);
         $this->view->setVar('item', $post);

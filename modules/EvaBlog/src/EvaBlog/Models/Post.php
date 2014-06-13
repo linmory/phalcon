@@ -120,6 +120,8 @@ class Post extends Entities\Posts
             '-id' => 'id DESC',
             'created_at' => 'createdAt ASC',
             '-created_at' => 'createdAt DESC',
+            'sort_order' => 'sortOrder ASC',
+            '-sort_order' => 'sortOrder DESC',
         );
 
         if (!empty($query['columns'])) {
@@ -145,10 +147,24 @@ class Post extends Entities\Posts
 
         $order = 'createdAt DESC';
         if (!empty($query['order'])) {
-            $order = empty($orderMapping[$query['order']]) ? 'createdAt DESC' : $orderMapping[$query['order']];
+            $orderArray = explode(',', $query['order']);
+            if(count($orderArray) > 1) {
+                $order = array();
+                foreach($orderArray as $subOrder) {
+                    if($subOrder && !empty($orderMapping[$subOrder])) {
+                        $order[] = $orderMapping[$subOrder];
+                    }
+                }
+            } else {
+                $order = empty($orderMapping[$orderArray[0]]) ? array('createdAt DESC') : array($orderMapping[$query['order']]);
+            }
+
+            //Add default order as last order
+            array_push($order, 'createdAt DESC');
+            $order = array_unique($order);
+            $order = implode(', ', $order);
         }
         $itemQuery->orderBy($order);
-
         return $itemQuery;
     }
 
@@ -158,9 +174,6 @@ class Post extends Entities\Posts
         $textData = isset($data['text']) ? $data['text'] : array();
         $tagData = isset($data['tags']) ? $data['tags'] : array();
         $categoryData = $data['categories'];
-        unset($data['tags']);
-        unset($data['text']);
-        unset($data['categories']);
 
         $text = new Text();
         $text->assign($textData);
@@ -204,9 +217,6 @@ class Post extends Entities\Posts
         $textData = $data['text'];
         $tagData = $data['tags'];
         $categoryData = $data['categories'];
-        unset($data['text']);
-        unset($data['tags']);
-        unset($data['categories']);
 
         $text = new Text();
         $text->assign($textData);

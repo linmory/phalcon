@@ -14,10 +14,12 @@ use Phalcon\DI\FactoryDefault;
 use Phalcon\Config;
 use Phalcon\Loader;
 use Phalcon\Mvc\Application;
+use Phalcon\Debug;
 use Phalcon\Events\Manager as EventsManager;
 use Phalcon\Logger\Adapter\File as FileLogger;
 use Phalcon\Mvc\Dispatcher;
 use Eva\EvaEngine\Mvc\View;
+use Eva\EvaEngine\Module\Manager as ModuleManager;
 use Eva\EvaEngine\Mvc\Model\Manager as ModelManager;
 use Eva\EvaEngine\Tag;
 
@@ -64,9 +66,11 @@ class Engine
 
     protected $environment; //development | test | production
 
+    protected $debugger;
+
     public function getEnvironment()
     {
-        return $this->environment = getenv('APPLICATION_ENV') ?: 'development';
+        return $this->environment;
     }
 
     public function setEnvironment($environment)
@@ -127,22 +131,38 @@ class Engine
     }
 
 
-    public function readCache($cacheFile)
+    public function readCache($cacheFile, $serialize = false)
     {
         if(file_exists($cacheFile) && $cache = include($cacheFile)) {
-            return $cache;
+            return true === $serialize ? unserialize($cache) : $cache;
         }
         return null;
     }
 
-    public function writeCache($cacheFile, array $content)
+    public function writeCache($cacheFile, $content, $serialize = false)
     {
         if($cacheFile && $fh = fopen($cacheFile, 'w')) {
-            fwrite($fh, '<?php return ' . var_export($content, true) . ';');
+            if(true === $serialize) {
+                fwrite($fh, "<?php return '" . serialize($content) . "';");
+            } else {
+                fwrite($fh, '<?php return ' . var_export($content, true) . ';');
+            }
             fclose($fh);
             return true;
         }
         return false;
+    }
+
+    public function getDebugger()
+    {
+        if($this->debugger) {
+            return $this->debugger;
+        }
+
+        $debugger = new Debug();
+        $debugger->setShowFileFragment(true);
+        $debugger->listen(true, true);
+        return $this->debugger = $debugger;
     }
 
     public function getApplication()
@@ -183,6 +203,47 @@ class Engine
         return $this;
     }
 
+    public function attachModuleEvents()
+    {
+        $di = $this->getDI();
+        $cachePrefix = $this->getAppName();
+        $cacheFile = $this->getConfigPath() . "/_cache.$cachePrefix.events.php";
+        $listeners = $this->readCache($cacheFile);
+
+        if(!$listeners) {
+            $moduleManager = $this->getDI()->getModuleManager();
+            $modules = $moduleManager->getModules();
+            $listeners = array();
+            foreach ($modules as $moduleName => $module) {
+                $moduleListeners = $moduleManager->getModuleListeners($moduleName);
+                if($moduleListeners) {
+                    $listeners[$moduleName] = $moduleListeners;
+                }
+            }
+        }
+
+        if(!$listeners) {
+            return $this;
+        }
+
+        $eventsManager = $this->getDI()->getEventsManager();
+        foreach($listeners as $moduleName => $moduleListeners) {
+            foreach($moduleListeners as $eventType => $listener) {
+                $eventsManager->attach($eventType, new $listener);
+            }
+        }
+
+        if($di->getConfig()->debug) {
+            $debugger = $this->getDebugger();
+            $debugger->debugVar($listeners, 'events');
+        }
+
+        if(!$di->getConfig()->debug && $listeners) {
+            $this->writeCache($cacheFile, $listeners);
+        }
+        return $this;
+    }
+
     public function setDI(\Phalcon\DiInterface $di)
     {
         $this->di = $di;
@@ -220,7 +281,9 @@ class Engine
 
         //System global events manager
         $di->set('eventsManager', function () {
-            return new EventsManager();
+            $eventsManager = new EventsManager();
+            $eventsManager->enablePriorities(true);
+            return $eventsManager;
         }, true);
 
         $di->set('config', function () use ($self) {
@@ -401,6 +464,9 @@ class Engine
         $di = $this->getDI();
         $cachePrefix = $this->getAppName();
         $cacheFile = $this->getConfigPath() . "/_cache.$cachePrefix.router.php";
+        if($router = $this->readCache($cacheFile, true)) {
+            return $router;
+        }
 
         $moduleManager = $di->getModuleManager();
         $config = new Config();
@@ -427,6 +493,10 @@ class Engine
             } else {
                 $router->add($url, $route);
             }
+        }
+
+        if(!$di->getConfig()->debug) {
+            $this->writeCache($cacheFile, $router, true);
         }
         return $router;
     }
@@ -642,11 +712,11 @@ class Engine
     public function bootstrap()
     {
         if ($this->getDI()->getConfig()->debug) {
-            $debugger = new \Phalcon\Debug();
-            $debugger->debugVar($this->getApplication()->getModules(), 'modules');
-            $debugger->listen(true, true);
+            $debugger = $this->getDebugger();
+            $debugger->debugVar($this->getDI()->getModuleManager()->getModules(), 'modules');
         }
         $this->getApplication()->setDI($this->getDI());
+        $this->attachModuleEvents();
         //Error Handler must run before router start
         $this->initErrorHandler(new Error\ErrorHandler);
         return $this;
@@ -678,8 +748,7 @@ class Engine
 
         $debug = $di->get('config')->debug;
         if ($debug) {
-            $debugger = new \Phalcon\Debug();
-            $debugger->listen();
+            $debugger = $this->getDebugger();
         }
 
         //Roter
@@ -731,6 +800,7 @@ class Engine
     public function __construct($appRoot = null, $appName = 'evaengine')
     {
         $this->appRoot = $appRoot ? $appRoot : __DIR__;
-        $this->appName = $appName;
+        $this->appName = empty($_SERVER['APPLICATION_NAME']) ? $appName : $_SERVER['APPLICATION_NAME'];
+        $this->environment = empty($_SERVER['APPLICATION_ENV']) ? 'development' : $_SERVER['APPLICATION_ENV'];
     }
 }

@@ -1,7 +1,7 @@
 <div class="row relative">
     <div class="span8">
         <div id="main">
-            <?$pager = $this->tag->component('post', array('status' => 'published', 'cid' => 1 ,'limit' => 11));$posts = $pager->items?>
+            <?$pager = $this->tag->component('post', array('status' => 'published', 'order' => '-sort_order', 'cid' => 1 ,'limit' => 11));$posts = $pager->items?>
             <?$post = $posts->getFirst();?>
             <div class="row">
                 <?if($post):?>
@@ -18,7 +18,7 @@
                     <li class="title"><h2><a href="/news/list?cid=1">头条新闻</a><a class="more" href="/news/list?cid=1">更多 &gt;&gt;</a></h2></li>
                     <?foreach($posts as $key => $post):?>
                     <?if($key > 0):?>
-                    <li class="item"><a class="link" href="/post/<?=$post->slug?>"><?=$this->escaper->escapeHtmlAttr($post->title)?> <span class="time"><?=$this->tag->datetime($post->createdAt, 'H:m')?></span></a></li>
+                    <li class="item <?=$post->sortOrder > 0 ? 'text-bold' : ''?>"><a class="link" href="/post/<?=$post->slug?>"><?=$this->escaper->escapeHtmlAttr($post->title)?> <span class="time"><?=$this->tag->datetime($post->createdAt, 'H:m')?></span></a></li>
                     <?endif?>
                     <?endforeach?>
                 </ul>
