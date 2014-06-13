@@ -1,7 +1,7 @@
 <?php
 namespace ModuleManagerTest;
 
-use Eva\EvaEngine\ModuleManager;
+use Eva\EvaEngine\Module\Manager as ModuleManager;
 
 class ModuleManagerTest extends \PHPUnit_Framework_TestCase
 {
@@ -24,7 +24,6 @@ class ModuleManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('/bar/Foo/config/config.php', $modules['Foo']['moduleConfig']);
         $this->assertEquals('/bar/Foo/config/routes.backend.php', $modules['Foo']['routesBackend']);
         $this->assertEquals('/bar/Foo/config/routes.frontend.php', $modules['Foo']['routesFrontend']);
-        $this->assertEquals('/bar/Foo/Listener.php', $modules['Foo']['listener']);
 
         $moduleManager->loadModules(array(
             'Blog' => array(
@@ -33,7 +32,6 @@ class ModuleManagerTest extends \PHPUnit_Framework_TestCase
                 'moduleConfig' => '/testconfig',
                 'routesBackend' => '/testbackend',
                 'routesFrontend' => '/testfrontend',
-                'listener' => '/testlistener',
             ),
             'User' => array(
             ),
@@ -46,7 +44,6 @@ class ModuleManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('/testconfig', $modules['Blog']['moduleConfig']);
         $this->assertEquals('/testbackend', $modules['Blog']['routesBackend']);
         $this->assertEquals('/testfrontend', $modules['Blog']['routesFrontend']);
-        $this->assertEquals('/testlistener', $modules['Blog']['listener']);
         $this->assertTrue(isset($modules['User']['className']));
         $this->assertEquals('Eva\User\Module', $modules['User']['className']);
     }
