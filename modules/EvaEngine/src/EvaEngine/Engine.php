@@ -162,7 +162,7 @@ class Engine
         $debugger = new Debug();
         $debugger->setShowFileFragment(true);
         $debugger->listen(true, true);
-        return $this->debug = $debugger;
+        return $this->debugger = $debugger;
     }
 
     public function getApplication()
@@ -713,7 +713,7 @@ class Engine
     {
         if ($this->getDI()->getConfig()->debug) {
             $debugger = $this->getDebugger();
-            $debugger->debugVar($this->getApplication()->getModules(), 'modules');
+            $debugger->debugVar($this->getDI()->getModuleManager()->getModules(), 'modules');
         }
         $this->getApplication()->setDI($this->getDI());
         $this->attachModuleEvents();

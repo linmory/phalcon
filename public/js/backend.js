@@ -405,6 +405,11 @@ $(document).ready(function(){
 
 });
 
+//表格排序空间
+// data-sortable-key 排序字段在url中的对应值
+// data-sortable-default 默认按哪个字段排序
+// data-sortable-value 用于标记排序的字段
+// data-sortable-default 用于标记字段的默认值
 $('.table-sortable').each(function(){
     var sortableTable = $(this),
         sortUri = new Uri(window.location),
@@ -426,7 +431,7 @@ $('.table-sortable').each(function(){
         if(currentSort == linkSort || currentSort == '-' + linkSort) {
             link.addClass('active');
             link.append(isCurrentSortAsc ? ' <i class="icon-caret-up"></i>' : ' <i class="icon-caret-down"></i>');
-            linkUri.replaceQueryParam(sortKey, isCurrentSortAsc ? '-' + linkSort : linkSort);
+            linkUri.replaceQueryParam(sortKey, currentSort.substring(0, 1) === '-' ? currentSort.substring(1) : '-' + linkSort);
         } else {
             linkUri.replaceQueryParam(sortKey, link.attr('data-sortable-default') ? link.attr('data-sortable-default') : '-' + linkSort);
         }
@@ -436,7 +441,7 @@ $('.table-sortable').each(function(){
     });
 });
 
-
+//按钮点击更换Form的某个值
 $('.form-submiter').on('click', function(){
     var submiter = $(this);
     var form = submiter.closest('form');
@@ -447,7 +452,7 @@ $('.form-submiter').on('click', function(){
     return true;
 });
 
-
+//单按钮ajax表单
 $('*[data-ajax-form]').each(function(){
     var form = $(this);
     var submiter = form.hasClass('ajax-form-sumbit') ? form : null;
@@ -476,6 +481,26 @@ $('*[data-ajax-form]').each(function(){
     });
 });
 
+//Ajax动态更新field值
+$('.ajax-field-edit').each(function(){
+    var input = $(this);
+    input.on('blur', function(){
+        var data = {};
+        data[$(this).attr('data-name')] = $(this).val();
+        $.ajax({
+            url : input.attr('data-form-action'),
+            type : input.attr('date-method'),
+            data : data,
+            success : function(){
+                if(input.attr('data-callback')) {
+                    eval(input.attr('data-callback'));
+                }
+            }
+        })
+    });
+});
+
+//批处理UI
 $('*[data-batch-form]').each(function(){
     var form = $(this);
     var submiter = form.hasClass('ajax-form-sumbit') ? form : null;
@@ -521,6 +546,8 @@ $('*[data-batch-form]').each(function(){
 
 });
 
+
+//转换title为拼音并自动填充
 $(".slug-generator").each(function(){
     var generator = $(this),
         target = $($(this).attr('data-slug-target')),
