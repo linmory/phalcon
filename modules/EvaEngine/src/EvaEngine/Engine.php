@@ -305,8 +305,11 @@ class Engine
         }, true);
 
         $di->set('modelsManager', function () use ($di) {
+            $config = $di->getConfig();
+            ModelManager::setDefaultPrefix($config->dbAdapter->prefix);
             //for solving db master/slave under static find method
             $modelsManager = new ModelManager();
+
             return $modelsManager;
         });
 
@@ -565,7 +568,9 @@ class Engine
 
         $dbAdapter = new $adapterMapping[$adapterName]($options);
 
+
         $config = $this->getDI()->getConfig();
+
         if ($config->debug) {
             $di = $this->getDI();
             $eventsManager = $di->getEventsManager();
@@ -730,7 +735,7 @@ class Engine
 
     public function initErrorHandler(Error\ErrorHandlerInterface $errorHandler)
     {
-        if($this->getDI()->get('config')->debug) {
+        if($this->getDI()->getConfig()->debug) {
             return $this;
         }
 

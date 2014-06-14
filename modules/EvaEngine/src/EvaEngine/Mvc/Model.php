@@ -2,9 +2,13 @@
 
 namespace Eva\EvaEngine\Mvc;
 
+use Phalcon\Mvc\Model\Resultset\Simple as SimpleResultSet;
+use Eva\EvaEngine\Mvc\Model\Manager as ModelManager;
+
+
 class Model extends \Phalcon\Mvc\Model
 {
-    protected $prefix = 'eva_';
+    protected $prefix;
 
     protected $tableName;
 
@@ -15,7 +19,6 @@ class Model extends \Phalcon\Mvc\Model
     public function setModelForm($form)
     {
         $this->modelForm = $form;
-
         return $this;
     }
 
@@ -24,9 +27,23 @@ class Model extends \Phalcon\Mvc\Model
         return $this->modelForm;
     }
 
+    public function setPrefix($tablePrefix)
+    {
+        $this->prefix = $tablePrefix;
+        return $htis;
+    }
+
+    public function getPrefix()
+    {
+        if($this->prefix) {
+            return $this->prefix;
+        }
+        return $this->prefix = ModelManager::getDefaultPrefix();
+    }
+
     public function getSource()
     {
-        return $this->prefix . $this->tableName;
+        return $this->getPrefix() . $this->tableName;
     }
 
     public function dump(array $dataStructure = null)
@@ -40,7 +57,7 @@ class Model extends \Phalcon\Mvc\Model
                 $data[$subdata] = $this->$subdata;
             } elseif (is_array($subdata)) {
                 if (!empty($this->$key)) {
-                    if ($this->$key instanceof \Phalcon\Mvc\Model\Resultset\Simple) {
+                    if ($this->$key instanceof SimpleResultSet) {
                         $subdatas = array();
                         foreach ($this->$key as $child) {
                             $subdatas[] = $child->dump($subdata);
