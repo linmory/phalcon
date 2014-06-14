@@ -137,6 +137,7 @@ return array(
     ),
 
     'dbAdapter' => array(
+        'prefix' => 'eva_',
         'master' => array(
             /*
             'adapter' => 'mysql',

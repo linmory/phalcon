@@ -4,8 +4,9 @@ namespace Eva\EvaUser\Controllers\Admin;
 
 use Eva\EvaUser\Forms;
 use Eva\EvaUser\Models;
+use Eva\EvaEngine\Mvc\Controller\AuthorityControllerInterface;
 
-class UserController extends AdminControllerBase
+class UserController extends AdminControllerBase implements AuthorityControllerInterface
 {
 
     /**

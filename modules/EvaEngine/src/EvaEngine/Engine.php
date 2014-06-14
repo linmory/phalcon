@@ -742,7 +742,7 @@ class Engine
         $errorClass = get_class($errorHandler);
         set_error_handler("$errorClass::errorHandler");
         set_exception_handler("$errorClass::exceptionHandler");
-        register_shutdown_function("$errorClass::shutdownHandler");
+        //register_shutdown_function("$errorClass::shutdownHandler");
         return $this;
     }
 
