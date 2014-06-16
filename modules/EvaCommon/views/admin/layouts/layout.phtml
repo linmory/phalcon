@@ -196,7 +196,10 @@
 					</div><!-- #sidebar-shortcuts -->
 
 					<ul class="nav nav-list">
-                        <??>
+                        <?$moduleManager = $this->moduleManager;$modules = $moduleManager->getModules();?>
+                        <?foreach($modules as $moduleName => $module):?>
+                        <?$moduleManager->getModuleAdminMenu($moduleName)?>
+                        <?endforeach?>
 					</ul><!-- /.nav-list -->
 
 					<div class="sidebar-collapse" id="sidebar-collapse">
