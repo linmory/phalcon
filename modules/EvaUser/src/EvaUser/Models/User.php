@@ -7,6 +7,22 @@ use Eva\EvaFileSystem\Models\Upload as UploadModel;
 
 class User extends Entities\Users
 {
+    public static $defaultDump = array(
+        'id',
+        'username',
+        'email',
+        'status',
+        'screenName',
+        'firstName',
+        'lastName',
+        'gender',
+        'avatar',
+        'emailStatus',
+        'createdAt',
+        'loginAt',
+        'providerType',
+    );
+
     public function beforeCreate()
     {
         $this->createdAt = $this->createdAt ? $this->createdAt : time();
@@ -59,7 +75,7 @@ class User extends Entities\Users
     {
         $itemQuery = $this->getDI()->get('modelsManager')->createBuilder();
 
-        $itemQuery->from(get_class($this));
+        $itemQuery->from(__CLASS__);
 
         $orderMapping = array(
             'id' => 'id ASC',

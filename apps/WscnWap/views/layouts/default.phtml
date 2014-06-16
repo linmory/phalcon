@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title><?=$this->placeholder->block('title', '华尔街见闻移动版');?></title>
+	<title><?=$this->placeholder->block('title', '华尔街见闻移动版');?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-	<link href="http://wallstreetcn.com/favicon.ico" rel="shortcut icon" type="image/x-icon">
+	<link href="favicon.ico" rel="shortcut icon" type="image/x-icon">
 	<link rel="stylesheet" href="http://cdn.static.wallstreetcn.com/css/bootstrap.min.css" />
 	<link rel="stylesheet" href="http://cdn.static.wallstreetcn.com/css/font-awesome.min.css" />
 	<style type="text/css">
@@ -15,8 +15,8 @@
 			border: 0;
 			margin: 0;
 			padding: 0;
-			height: 34px;
-			min-height: 34px;
+			height: 36px;
+			min-height: 36px;
 			font-size: 18px;
 			font-weight: normal;
 		}
@@ -55,152 +55,101 @@
 			height: 34px;
 		}
 		
-		.news-info{
-			padding: 12px 15px !important;
-			-webkit-transform: translate3d(0px, 0px, 0px);
-			/*position: absolute;
-			min-width: 100%;
-			min-height: 100%;
-			height: auto!important;
-			width: auto!important;*/
-			width:100%;
-			height:100%;
-			background: #f7f7f7;
-			font-size: 16px;
+		.news-list{
+			
+			position: absolute;
+			width: 100%;
+			/*height: 100%;*/
 		}
 		
-		.news-info .title {
-			font-size: 20px;
+		.news-font{
+			margin:0px;
+			font-weight:normal;
+			font-family: verdana, 'Hiragino Sans GB', 'Microsoft YaHei', 'WenQuanYi Micro Hei', sans-serif;
 		}
 		
-		.news-info .meta {
+		.news-list .news {
 			position: relative;
+			width: 100%;
+			min-height: 42px !important;
+			border-top: 1px solid #dedede;
+			padding: 12px 15px;
+		}
+		
+		.news-list .news .cover {
+			width: 75px;
+			height: 60px;
+			float: left;
+			background: url('/wscnwap/cover.png') 0 0 no-repeat;
+			background-size: 75px 60px;
+			-o-background-size: 75px 60px;
+			-webkit-background-size: 75px 60px;
+		}
+		
+		.news-list .news .title {
+			position: absolute;
+			left: 75px;
+			right: 0;
+			overflow: hidden;
+			line-height: 20px;
+			height: 40px;
+			padding-left: 30px;
+			font-size:15px;
+		}
+		
+		.news-list .news .time {
+			position: absolute;
 			font-size: 12px;
-			line-height: 24px;
-			padding-bottom: 6px;
-			color: #999;
-			border-bottom: 1px solid #999;
-			margin: 10px 0;
+			right: 15px;
+			bottom: 12px;
+			color:#666666;
 		}
 		
-		.news-info .content {
-			line-height: 1.5;
-			margin-bottom: 20px;
+		.news-more{
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom:0;
+			margin: 0 auto;
+			width: 8em;
+			margin-bottom: 10px;
 		}
 		
-		.news-info .content img {
-			max-width: 100%!important;
-			height: auto!important;
+		.news-more span{
+			border: solid #0f496d 1px;
+			font-size:12px;
+			padding:5px 30px;
+			color:#0f496d;
+			border-radius: 5px;
+			
 		}
-
-        .news-info .meta>.item {
-                margin-right: 1em;
-        }
-		
-		#download-app {
-            display: none;
-            font-family: Verdana, Tahoma, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
-            position: fixed;
-            z-index: 999;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            padding-top: 60px;
-            background-color: #fff;
-            text-align: center;
-            font-size: 14px;
-            color: #999;    
-        }
-        #download-app .logo {
-            width: 42px;
-            height: 42px;
-        }
-        #download-app h3 {
-            font-weight: normal;
-            font-size: 16px;
-            margin-top: 15px;
-            margin-bottom: 30px;
-        }
-        #download-app p {
-            margin: 0;
-            padding: 0;
-            line-height: 2em;
-        }
-        #download-app .button {
-            color: #444;
-            display: block;
-            position: relative;
-            margin: 20px auto;
-            background-color: #ddeafe;
-            border-color: #ccc;
-            line-height: 40px;
-            width: 170px;
-            height: 40px;
-            border-radius: 5px;
-            padding: 0 15px;
-        }
-        #download-app .button .icon {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 15px;
-            margin: auto 0;
-        }
-        #download-app .button .text {
-            display: block;
-            float: right;
-            font-size: 16px;
-        }
-    </style>
-
+	
+	</style>
+	
 </head>
 <body>
 
-<!--
-<div id="download-app">
-        <img src="/wscnwap/logo_w.png" alt="" class="logo">
-        <h3>华尔街见闻提醒您</h3>
-        <p>
-            强烈推荐华尔街见闻App<br/>
-            为移动而生、第一时间知道金融市场异动
-        </p>
-        <a class="button" href="javascript:void(0);" onclick="closeDownloadApp();" data-action="close">
-            <img src="/wscnwap/phone.png" width="15" height="28" alt="" class="icon">
-            <span class="text">进入移动版网站</span>
-        </a>
-        <a class="button" href="http://wallstreetcn.com/downloadapp.html">
-            <img src="/wscnwap/app.png" width="23" height="23" alt="" class="icon">
-            <span class="text">App客户端下载</span>
-        </a>
-    </div>
--->
-
 <div style="width: 100% !important; height: 100% !important;">
 	<div class="toolbar">
-        <!--<a href="http://wallstreetcn.com/"><div class="home"><i class="icon-home"></i></div></a>
-		<div class="title"><img src="/wscnwap/logo.png" /></div>-->
-		<a href="http://wallstreetcn.com/"><div class="home"><img src="/wscnwap/logo.png"/></div></a>
-		<a href="http://wallstreetcn.com/downloadapp.html"><div class="app-download"><img src="/wscnwap/app-download.png" /></div></a>
+		<a href="/"><div class="home"><img src="/wscnwap/logo.png"/></div></a>
+		<a href="http://wallstreetcn.com/downloadapp.html" target="_blank"><div class="app-download"><img src="/wscnwap/app-download.png" /></div></a>
 	</div>
-    <?=$this->getContent()?>
+<?=$this->getContent()?>
+</div>
 
 <script src="http://cdn.static.wallstreetcn.com/js/jquery-1.10.2.min.js"></script>
-<!--
-<script src="http://cdn.static.wallstreetcn.com/js/store.min.js"></script>
--->
+<script src="http://cdn.static.wallstreetcn.com/js/moment-with-langs.min.js"></script>
+
 <script type="text/javascript">
-
-    /*function closeDownloadApp() {
-            document.getElementById('download-app').style.display = "none";
-    } 
-
-	if (store.get('hasShowAppPage')  == null) {
-        document.getElementById('download-app').style.display = "block";
-        store.set('hasShowAppPage',"true");
-    }*/
-
+$(document).ready(function(){
+    moment.lang('zh-cn');
+	$(".agotime").each(function(){
+		var time = $(this);
+        time.html(moment(time.attr("data-timestamp") * 1000).fromNow());
+	});
+});
 </script>
+
 <script type="text/javascript">
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-19303398-2']);
@@ -224,3 +173,4 @@
 	</script>
 </body>
 </html>
+

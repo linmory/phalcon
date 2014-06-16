@@ -65,13 +65,52 @@ return array(
         ),
         'httpMethods' => 'DELETE'
     ),
-    /*
-    '/v2/:controller/:action(/(\w+))*(\.(json|jsonp|xml))*' =>  array(
-        'module' => 'WscnApiVer2',
-        'controller' => 1,
-        'action' => 2,
-        'id' => 4,
-        'format' => 6,
+    'userlist' =>  array(
+        'pattern' => '/v2/user',
+        'paths' => array(
+            'module' => 'WscnApiVer2',
+            'controller' => 'user',
+            'action' => 'index',
+        ),
+        'httpMethods' => 'GET'
     ),
-    */
+    'createuser' =>  array(
+        'pattern' => '/v2/user',
+        'paths' => array(
+            'module' => 'WscnApiVer2',
+            'controller' => 'user',
+            'action' => 'user',
+        ),
+        'httpMethods' => 'POST'
+    ),
+    'getuser' =>  array(
+        'pattern' => '/v2/user/(\d+)',
+        'paths' => array(
+            'module' => 'WscnApiVer2',
+            'controller' => 'user',
+            'action' => 'get',
+            'id' => 1,
+        ),
+        'httpMethods' => 'GET'
+    ),
+    'putuser' =>  array(
+        'pattern' => '/v2/user/(\d+)',
+        'paths' => array(
+            'module' => 'WscnApiVer2',
+            'controller' => 'user',
+            'action' => 'put',
+            'id' => 1,
+        ),
+        'httpMethods' => 'PUT'
+    ),
+    'deleteuser' =>  array(
+        'pattern' => '/v2/user/(\d+)',
+        'paths' => array(
+            'module' => 'WscnApiVer2',
+            'controller' => 'user',
+            'action' => 'delete',
+            'id' => 1,
+        ),
+        'httpMethods' => 'DELETE'
+    ),
 );

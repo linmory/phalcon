@@ -105,9 +105,6 @@ class Tag extends \Phalcon\Tag
 
     public static function thumb($uri, $query = null, $configKey = 'default')
     {
-        if (\Phalcon\Text::startsWith($uri, 'http://', false) || \Phalcon\Text::startsWith($uri, 'https://', false)) {
-            return $uri;
-        }
 
         if ($query) {
             if (true === is_array($query)) {
@@ -128,7 +125,13 @@ class Tag extends \Phalcon\Tag
             }
         }
 
-        $config = self::getDI()->get('config');
+
+        if (\Phalcon\Text::startsWith($uri, 'http://', false) || \Phalcon\Text::startsWith($uri, 'https://', false)) {
+            return $uri;
+        }
+
+
+        $config = self::getDI()->getConfig();
         if (isset($config->thumbnail->$configKey->baseUri) && $baseUrl = $config->thumbnail->$configKey->baseUri) {
             return $baseUrl . $uri;
         }

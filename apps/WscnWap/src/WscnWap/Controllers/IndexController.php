@@ -10,8 +10,7 @@ class IndexController extends ControllerBase
 {
     public function beforeExecuteRoute()
     {
-        $id = $this->dispatcher->getParam('id');
-        $cacheKey = "node-$id";
+        $cacheKey = 'node-' . md5($this->request->getURI());
         $this->view->cache(array(
             'lifetime' => 3600,
             'key' => $cacheKey,
@@ -23,7 +22,16 @@ class IndexController extends ControllerBase
 
     public function indexAction()
     {
-        return $this->response->redirect('http://wallstreetcn.com/');
+        $page = $this->request->getQuery('page', 'int', '0');
+        $provider  = Request::getProvider();
+        $provider->setBaseUri('http://api.wallstreetcn.com/apiv1/');
+        $response = $provider->get('news-list.json', array(
+            'page' => $page,
+        ));
+        //$response->header->statusCode;
+        $posts = json_decode($response->body);
+        $this->view->setVar('posts', $posts);
+        $this->view->setVar('page', $page);
     }
 
     public function nodeAction()
