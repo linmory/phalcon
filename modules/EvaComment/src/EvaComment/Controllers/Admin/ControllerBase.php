@@ -7,8 +7,8 @@ class ControllerBase extends Base
 {
     public function initialize()
     {
-        $this->view->setModuleLayout('EvaCore', '/views/admin/layouts/layout');
+        $this->view->setModuleLayout('EvaCommon', '/views/admin/layouts/layout');
         $this->view->setModuleViewsDir('EvaComment', '/views');
-        $this->view->setModulePartialsDir('EvaCore', '/views');
+        $this->view->setModulePartialsDir('EvaCommon', '/views');
     }
 }

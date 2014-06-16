@@ -32,10 +32,10 @@ class CategoriesPosts extends \Eva\EvaEngine\Mvc\Model
     public function initialize()
     {
         $this->belongsTo('categoryId', 'Eva\EvaBlog\Entities\Categories', 'id',
-            array('alias' => 'Category')
+        array('alias' => 'category')
         );
         $this->belongsTo('postId', 'Eva\EvaBlog\Entities\Posts', 'id',
-            array('alias' => 'Post')
+            array('alias' => 'post')
         );
     }
 }

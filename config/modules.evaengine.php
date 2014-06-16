@@ -1,6 +1,6 @@
 <?php
 return array(
-    'EvaCore',
+    'EvaCommon',
     'EvaUser',
     'EvaOAuthClient',
     'EvaOAuthServer',

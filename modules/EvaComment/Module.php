@@ -19,6 +19,13 @@ class Module implements ModuleDefinitionInterface, StandardInterface
     {
     }
 
+    public static function registerGlobalViewHelpers()
+    {
+        return array(
+            'passTime' => 'Eva\EvaComment\View\Helpers\PassTime'
+        );
+    }
+
     /**
      * Registers the module auto-loader
      */
