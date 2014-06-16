@@ -20,8 +20,26 @@ class Operations extends \Eva\EvaEngine\Mvc\Model
 
     /**
      *
+     * @var string
+     */
+    public $operationKey;
+
+    /**
+     *
      * @var integer
      */
     public $resourceId;
+
+    /**
+     *
+     * @var string
+     */
+    public $resourceKey;
+
+    /**
+     *
+     * @var string
+     */
+    public $description;
 
 }

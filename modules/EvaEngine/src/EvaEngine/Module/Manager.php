@@ -117,6 +117,8 @@ class Manager implements EventsAwareInterface
             'routesFrontend' => '', //module router frontend path
             'routesBackend' => '', //module router backend path
             'listeners' => '', //module listeners list array
+            'viewHelpers' => '', //module view helpers
+            'adminMenu' => '', //admin menu
             'translatePath' => false,
         );
 
@@ -152,6 +154,7 @@ class Manager implements EventsAwareInterface
             $module['routesBackend'] = false === $module['routesBackend'] || $module['routesBackend'] ? $module['routesBackend'] : $module['dir'] . '/config/routes.backend.php';
             $module['routesFrontend'] = false === $module['routesFrontend'] || $module['routesFrontend'] ? $module['routesFrontend'] : $module['dir'] . '/config/routes.frontend.php';
             $module['translatePath'] = false === $module['translatePath'] || $module['translatePath'] ? $module['translatePath'] : $module['dir'] . '/languages';
+            $module['adminMenu'] = false === $module['adminMenu'] || $module['adminMenu'] ? $module['adminMenu'] : $module['dir'] . '/config/admin.menu.php';
 
             $classes[$module['className']] = $module['path'];
             $modules[$moduleKey] = $module;
@@ -169,6 +172,7 @@ class Manager implements EventsAwareInterface
                 $namespaces += $namespace;
             }
             $modules[$key]['listeners'] = $module['className']::registerGlobalEventListeners();
+            $modules[$key]['viewHelpers'] = $module['className']::registerGlobalViewHelpers();
         }
         $loader->registerNamespaces($namespaces)->register();
 
@@ -227,6 +231,24 @@ class Manager implements EventsAwareInterface
         $modules = $this->getModules();
         if (!empty($modules[$moduleName]['listeners'])) {
             return $modules[$moduleName]['listeners'];
+        }
+        return array();
+    }
+
+    public function getModuleAdminMenu($moduleName)
+    {
+        $modules = $this->getModules();
+        if (!empty($modules[$moduleName]['adminMenu']) && file_exists($modules[$moduleName]['adminMenu'])) {
+            return include $modules[$moduleName]['adminMenu'];
+        }
+        return '';
+    }
+
+    public function getModuleViewHelpers($moduleName)
+    {
+        $modules = $this->getModules();
+        if (!empty($modules[$moduleName]['viewHelpers'])) {
+            return $modules[$moduleName]['viewHelpers'];
         }
         return array();
     }

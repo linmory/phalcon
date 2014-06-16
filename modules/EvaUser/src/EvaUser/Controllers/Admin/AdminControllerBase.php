@@ -6,9 +6,9 @@ class AdminControllerBase extends ControllerBase
 {
     public function initialize()
     {
-        $this->view->setModuleLayout('EvaCore', '/views/admin/layouts/layout');
+        $this->view->setModuleLayout('EvaCommon', '/views/admin/layouts/layout');
         $this->view->setModuleViewsDir('EvaUser', '/views');
-        $this->view->setModulePartialsDir('EvaCore', '/views');
+        $this->view->setModulePartialsDir('EvaCommon', '/views');
     }
 
 }

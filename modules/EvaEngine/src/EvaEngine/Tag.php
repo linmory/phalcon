@@ -4,6 +4,18 @@ namespace Eva\EvaEngine;
 
 class Tag extends \Phalcon\Tag
 {
+    protected static $helpers = array();
+
+    public static function registerHelpers(array $helpers = array())
+    {
+        self::$helpers = array_merge(self::$helpers, $helpers);
+    }
+
+    public static function unregisterHelper($helperName)
+    {
+    
+    }
+
     public static function config()
     {
         $config = self::getDI()->get('config');

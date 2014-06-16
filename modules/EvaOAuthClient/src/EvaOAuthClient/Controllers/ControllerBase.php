@@ -6,8 +6,8 @@ class ControllerBase extends \Eva\EvaEngine\Mvc\Controller\ControllerBase
 {
     public function initialize()
     {
-        $this->view->setModuleLayout('EvaCore', '/views/admin/layouts/login');
+        $this->view->setModuleLayout('EvaCommon', '/views/admin/layouts/login');
         $this->view->setModuleViewsDir('EvaOAuthClient', '/views');
-        $this->view->setModulePartialsDir('EvaCore', '/views');
+        $this->view->setModulePartialsDir('EvaCommon', '/views');
     }
 }

@@ -174,6 +174,7 @@ class Engine
         return $this->application = new Application();
     }
 
+
     /**
      * Load modules from input settings, and call phalcon application->registerModules() for register
      * 
@@ -244,6 +245,36 @@ class Engine
         return $this;
     }
 
+
+    public function registerViewHelpers()
+    {
+        $di = $this->getDI();
+        $cachePrefix = $this->getAppName();
+        $cacheFile = $this->getConfigPath() . "/_cache.$cachePrefix.helpers.php";
+        $helpers = $this->readCache($cacheFile);
+        if($helpers) {
+            Tag::registerHelpers($helpers);
+            return $this;
+        }
+
+        $helpers = array();
+        $moduleManager = $di->getModuleManager();
+        $modules = $moduleManager->getModules();
+        foreach($modules as $moduleName => $module) {
+            $moduleHelpers = $moduleManager->getModuleViewHelpers($moduleName);
+            if(is_array($moduleHelpers)) {
+                $helpers += $moduleHelpers;
+            }
+        }
+        Tag::registerHelpers($helpers);
+
+        if(!$di->getConfig()->debug && $helpers) {
+            $this->writeCache($cacheFile, $helpers);
+        }
+        return $this;
+    }
+
+
     public function setDI(\Phalcon\DiInterface $di)
     {
         $this->di = $di;
@@ -251,12 +282,12 @@ class Engine
     }
 
     /**
-     * Configuration application default DI
-     *
-     * Most DI settings from config file
-     *
-     * @return FactoryDefault
-     */
+    * Configuration application default DI
+    *
+    * Most DI settings from config file
+    *
+    * @return FactoryDefault
+    */
     public function getDI()
     {
         if ($this->di) {
@@ -394,8 +425,9 @@ class Engine
 
         $di->set('escaper', 'Phalcon\Escaper');
 
-        $di->set('tag', function () use ($di) {
+        $di->set('tag', function () use ($di, $self) {
             Tag::setDi($di);
+            $self->registerViewHelpers();
             return new Tag();
         });
 

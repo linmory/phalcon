@@ -22,5 +22,28 @@ class Resources extends \Eva\EvaEngine\Mvc\Model
      *
      * @var string
      */
+    public $resourceKey;
+
+    /**
+     *
+     * @var string
+     */
+    public $resourceGroup;
+
+    /**
+     *
+     * @var string
+     */
     public $description;
+
+    public function initialize()
+    {
+        $this->hasMany(
+            'id',
+            'Eva\EvaBlog\Entities\Operations',
+            'resourceId',
+            array('alias' => 'operations')
+        );
+    
+    }
 }

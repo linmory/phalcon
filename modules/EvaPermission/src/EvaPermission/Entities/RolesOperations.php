@@ -2,15 +2,9 @@
 
 namespace Eva\EvaPermission\Entities;
 
-class UsersRoles extends \Eva\EvaEngine\Mvc\Model
+class RolesOperations extends \Eva\EvaEngine\Mvc\Model
 {
-    protected $tableName = 'permission_users_roles';
-
-    /**
-     *
-     * @var integer
-     */
-    public $userId;
+    protected $tableName = 'permission_roles_operations';
 
     /**
      *
@@ -18,16 +12,20 @@ class UsersRoles extends \Eva\EvaEngine\Mvc\Model
      */
     public $roleId;
 
+    /**
+     *
+     * @var integer
+     */
+    public $operationId;
 
     public function initialize()
     {
-        $this->belongsTo('userId', 'Eva\EvaUser\Entities\Users', 'id',
-            array('alias' => 'user')
-        );
+        
         $this->belongsTo('roleId', 'Eva\EvaPermission\Entities\Roles', 'id',
             array('alias' => 'role')
         );
-
-        parent::initialize();
+        $this->belongsTo('operationId', 'Eva\EvaPermission\Entities\Operations', 'id',
+            array('alias' => 'operationId')
+        );
     }
 }

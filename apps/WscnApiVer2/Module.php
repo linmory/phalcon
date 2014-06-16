@@ -21,6 +21,10 @@ class Module implements ModuleDefinitionInterface, StandardInterface
     {
     }
 
+    public static function registerGlobalViewHelpers()
+    {
+    }
+
     /**
      * Registers the module auto-loader
      */

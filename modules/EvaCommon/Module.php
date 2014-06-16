@@ -1,6 +1,6 @@
 <?php
 
-namespace Eva\EvaCore;
+namespace Eva\EvaCommon;
 
 use Phalcon\Loader;
 use Phalcon\Mvc\Dispatcher;
@@ -12,11 +12,15 @@ class Module implements ModuleDefinitionInterface, StandardInterface
     public static function registerGlobalAutoloaders()
     {
         return array(
-            'Eva\EvaCore' => __DIR__ . '/src/EvaCore',
+            'Eva\EvaCommon' => __DIR__ . '/src/EvaCommon',
         );
     }
 
     public static function registerGlobalEventListeners()
+    {
+    }
+
+    public static function registerGlobalViewHelpers()
     {
     }
 
@@ -35,6 +39,6 @@ class Module implements ModuleDefinitionInterface, StandardInterface
     public function registerServices($di)
     {
         $dispatcher = $di->getDispatcher();
-        $dispatcher->setDefaultNamespace('Eva\EvaCore\Controllers');
+        $dispatcher->setDefaultNamespace('Eva\EvaCommon\Controllers');
     }
 }

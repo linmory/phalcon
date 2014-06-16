@@ -30,4 +30,21 @@ class Roles extends \Eva\EvaEngine\Mvc\Model
      */
     public $description;
 
+
+    public function initialize()
+    {
+        $this->hasManyToMany(
+            'id',
+            'Eva\EvaBlog\Entities\RolesOperations',
+            'roleId',
+            'operationId',
+            'Eva\EvaBlog\Entities\Operations',
+            'id',
+            array('alias' => 'operations')
+        );
+
+
+        parent::initialize();
+    }
+
 }

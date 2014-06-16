@@ -2,12 +2,12 @@
 
 return array(
     '/admin' => array(
-        'module' => 'EvaCore',
+        'module' => 'EvaCommon',
         'controller' => 'Admin\Index',
         'action' => 'index'
     ),
     '/admin/dashboard' => array(
-        'module' => 'EvaCore',
+        'module' => 'EvaCommon',
         'controller' => 'Admin\Index',
         'action' => 'dashboard'
     ),
