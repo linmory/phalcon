@@ -758,17 +758,20 @@ label.checkbox.right {
   overflow: hidden;
   position: relative;
 }
+#header .title > img,
+#header .ad > img,
+#header .title > div,
+#header .ad > div {
+  height: 90px;
+  float: right;
+  margin-top: 5px;
+}
 #header .logo {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 20px;
   margin: auto 0;
-}
-#header .ad > div {
-  height: 90px;
-  float: right;
-  margin-top: 5px;
 }
 #header .toolbar {
   height: 39px;
