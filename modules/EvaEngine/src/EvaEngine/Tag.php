@@ -2,8 +2,40 @@
 
 namespace Eva\EvaEngine;
 
+
+
 class Tag extends \Phalcon\Tag
 {
+    protected static $helpers = array();
+
+    public static function registerHelpers(array $helpers = array())
+    {
+        self::$helpers = array_merge(self::$helpers, $helpers);
+    }
+
+    public static function unregisterHelper($helperName)
+    {
+        if(isset(self::$helpers[$helperName])) {
+            unset(self::$helpers[$helperName]);
+        }
+    }
+
+    public function __call($helperName, $arguments)
+    {
+        if(method_exists(__CLASS__, $helperName)) {
+            return call_user_func_array(__CLASS__ . "::$helperName", $arguments);
+        }
+        if(empty(self::$helpers[$helperName])) {
+            throw new Exception\BadMethodCallException(sprintf('Request helper %s not registered', $helperName));
+        }
+        $helperClass = self::$helpers[$helperName];
+        $helper = new $helperClass();
+        return call_user_func_array(array(
+            $helper,
+            '__invoke'
+        ), $arguments);
+    }
+
     public static function config()
     {
         $config = self::getDI()->get('config');
@@ -59,23 +91,6 @@ class Tag extends \Phalcon\Tag
         }
 
         return $messageString;
-
-        /*
-        <?if($this->flash):?>
-        <?$messages = $this->flash->getMessages();?>
-        <?$classMapping = array(
-            'error' => 'alert alert-danger',
-            'warning' => 'alert alert-warning',
-            'success' => 'alert alert-success',
-            'notice' => 'alert alert-info',
-        );?>
-        <?foreach($messages as $type => $submessages):?>
-        <?foreach($submessages as $message):?>
-        <div class="alert <?=$classMapping[$type]?>" data-raw-message="<?=$this->escaper->escapeHtml($message);?>"><?=$this->tag->_($message)?></div>
-        <?endforeach?>
-        <?endforeach?>
-        <?endif?>
-        */
     }
 
     public static function uri($uri, array $query = null, array $baseQuery = null)
@@ -190,47 +205,4 @@ class Tag extends \Phalcon\Tag
 
         return gmdate($format, $time);
     }
-
-    /**
-     * @param $timestamp
-     * @return string
-     */
-    public static function passTime($timestamp)
-    {
-        $now = time();
-        $passTime = $now-$timestamp;
-        $oneMinute = 60;
-        $oneHour = $oneMinute*60;
-        $oneDay = $oneHour*24;
-        $oneMonth = $oneDay*30;
-        $oneYear = $oneMonth*12;
-        $str = '';
-        if($passTime>$oneYear){
-            $n = $passTime/$oneYear;
-            $n = intval($n);
-            $str = $n.'年前';
-        }elseif($passTime>$oneMonth){
-            $n = $passTime/$oneMonth;
-            $n = intval($n);
-            $str = $n.'月前';
-        }elseif($passTime>$oneDay){
-            $n = $passTime/$oneDay;
-            $n = intval($n);
-            $str = $n.'天前';
-        }elseif($passTime>$oneHour){
-            $n = $passTime/$oneHour;
-            $n = intval($n);
-            $str = $n.'小时前';
-        }elseif($passTime>$oneMinute){
-            $n = $passTime/$oneMinute;
-            $n = intval($n);
-            $str = $n.'分钟前';
-        }else{
-//            $str = $passTime.'秒前';
-            $str = '刚刚...';
-        }
-
-        return $str;
-    }
-
 }

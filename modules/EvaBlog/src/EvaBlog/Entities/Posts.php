@@ -64,7 +64,7 @@ class Posts extends \Eva\EvaEngine\Mvc\Model
      *
      * @var integer
      */
-    public $sortOrder;
+    public $sortOrder = 0;
 
     /**
      *

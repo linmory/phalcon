@@ -3,10 +3,11 @@
 namespace Eva\EvaOAuthServer;
 
 use Phalcon\Loader;
-use Phalcon\Mvc\View;
+use Phalcon\Mvc\Dispatcher;
 use Phalcon\Mvc\ModuleDefinitionInterface;
+use Eva\EvaEngine\Module\StandardInterface;
 
-class Module implements ModuleDefinitionInterface
+class Module implements ModuleDefinitionInterface, StandardInterface
 {
     public static function registerGlobalAutoloaders()
     {
@@ -15,18 +16,19 @@ class Module implements ModuleDefinitionInterface
         );
     }
 
+    public static function registerGlobalEventListeners()
+    {
+    }
+
+    public static function registerGlobalViewHelpers()
+    {
+    }
+
     /**
      * Registers the module auto-loader
      */
     public function registerAutoloaders()
     {
-        /*
-        $loader = new Loader();
-        $loader->registerNamespaces(array(
-            'Eva\EvaOAuthServer' => __DIR__ . '/src/EvaOAuthServer',
-        ));
-        $loader->register();
-        */
     }
 
     /**
@@ -36,22 +38,8 @@ class Module implements ModuleDefinitionInterface
      */
     public function registerServices($di)
     {
-        $di['dispatcher'] = function () {
-            $dispatcher = new \Phalcon\Mvc\Dispatcher();
-            $dispatcher->setDefaultNamespace('Eva\EvaOAuthServer\Controllers');
-
-            return $dispatcher;
-        };
-
-        /**
-         * Setting up the view component
-         */
-        $di['view'] = function () {
-            $view = new View();
-            $view->setViewsDir(__DIR__ . '/views/');
-
-            return $view;
-        };
+        $dispatcher = $di->getDispatcher();
+        $dispatcher->setDefaultNamespace('Eva\EvaOAuthServer\Controllers');
     }
 
 }

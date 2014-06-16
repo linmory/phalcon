@@ -3,27 +3,32 @@
 namespace Eva\Frontend;
 
 use Phalcon\Loader;
-use Phalcon\Mvc\View;
-use Phalcon\Db\Adapter\Pdo\Mysql as DbAdapter;
+use Phalcon\Mvc\Dispatcher;
 use Phalcon\Mvc\ModuleDefinitionInterface;
+use Eva\EvaEngine\Module\StandardInterface;
 
-class Module implements ModuleDefinitionInterface
+class Module implements ModuleDefinitionInterface, StandardInterface
 {
+    public static function registerGlobalAutoloaders()
+    {
+        return array(
+            'Eva\Frontend' => __DIR__ . '/src/Frontend',
+        );
+    }
+
+    public static function registerGlobalEventListeners()
+    {
+    }
+
+    public static function registerGlobalViewHelpers()
+    {
+    }
 
     /**
      * Registers the module auto-loader
      */
     public function registerAutoloaders()
     {
-
-        $loader = new Loader();
-
-        $loader->registerNamespaces(array(
-            'Eva\Frontend\Controllers' => __DIR__ . '/controllers/',
-            'Eva\Frontend\Models' => __DIR__ . '/models/',
-        ));
-
-        $loader->register();
     }
 
     /**
@@ -33,41 +38,8 @@ class Module implements ModuleDefinitionInterface
      */
     public function registerServices($di)
     {
-
-        /**
-         * Read configuration
-         */
-        $config = include __DIR__ . "/config/config.php";
-
-        $di['dispatcher'] = function () {
-            $dispatcher = new \Phalcon\Mvc\Dispatcher();
-            $dispatcher->setDefaultNamespace('Eva\Frontend\Controllers');
-
-            return $dispatcher;
-        };
-
-        /**
-         * Setting up the view component
-         */
-        $di['view'] = function () {
-            $view = new View();
-            $view->setViewsDir(__DIR__ . '/views/');
-
-            return $view;
-        };
-
-        /**
-         * Database connection is created based in the parameters defined in the configuration file
-         */
-        $di['db'] = function () use ($config) {
-            return new DbAdapter(array(
-                "host" => $config->database->host,
-                "username" => $config->database->username,
-                "password" => $config->database->password,
-                "dbname" => $config->database->name
-            ));
-        };
-
+        $dispatcher = $di->getDispatcher();
+        $dispatcher->setDefaultNamespace('Eva\Frontend\Controllers');
     }
 
 }

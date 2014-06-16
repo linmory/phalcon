@@ -43,6 +43,24 @@ class ProcessController extends ControllerBase implements JsonControllerInterfac
         return $this->response->setJsonContent($post);
     }
 
+    public function sortAction()
+    {
+        if (!$this->request->isPut()) {
+            return $this->displayJsonErrorResponse(405, 'ERR_REQUEST_METHOD_NOT_ALLOW');
+        }
+
+        $id = $this->dispatcher->getParam('id');
+        $post =  Models\Post::findFirst($id);
+        try {
+            $post->sortOrder = (int) $this->request->getPut('sortOrder');
+            $post->save();
+        } catch (\Exception $e) {
+            return $this->displayExceptionForJson($e, $post->getMessages());
+        }
+
+        return $this->response->setJsonContent($post);
+    }
+
     public function batchAction()
     {
         if (!$this->request->isPut()) {

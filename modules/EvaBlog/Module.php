@@ -3,15 +3,25 @@
 namespace Eva\EvaBlog;
 
 use Phalcon\Loader;
+use Phalcon\Mvc\Dispatcher;
 use Phalcon\Mvc\ModuleDefinitionInterface;
+use Eva\EvaEngine\Module\StandardInterface;
 
-class Module implements ModuleDefinitionInterface
+class Module implements ModuleDefinitionInterface, StandardInterface
 {
     public static function registerGlobalAutoloaders()
     {
         return array(
             'Eva\EvaBlog' => __DIR__ . '/src/EvaBlog',
         );
+    }
+
+    public static function registerGlobalEventListeners()
+    {
+    }
+
+    public static function registerGlobalViewHelpers()
+    {
     }
 
     /**
@@ -28,13 +38,8 @@ class Module implements ModuleDefinitionInterface
      */
     public function registerServices($di)
     {
-        $di->set('dispatcher', function () {
-            $dispatcher = new \Phalcon\Mvc\Dispatcher();
-            $dispatcher->setDefaultNamespace('Eva\EvaBlog\Controllers');
-
-            return $dispatcher;
-        });
-
+        $dispatcher = $di->getDispatcher();
+        $dispatcher->setDefaultNamespace('Eva\EvaBlog\Controllers');
     }
 
 }
