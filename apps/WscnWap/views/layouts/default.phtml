@@ -187,6 +187,11 @@ $(document).ready(function(){
 		var time = $(this);
         time.html(moment(time.attr("data-timestamp") * 1000).fromNow());
 	});
+	
+	//fix firefox,ie max-width bug
+	if(/firefox/.test(navigator.userAgent.toLowerCase()) || !!window.ActiveXObject || "ActiveXObject" in window){
+		$(".home img,.app-download img").css("max-width","50%");
+	}
 });
 </script>
 
