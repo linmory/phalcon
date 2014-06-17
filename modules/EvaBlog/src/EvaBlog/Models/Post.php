@@ -170,6 +170,7 @@ class Post extends Entities\Posts
 
     public function createPost(array $data)
     {
+        $this->assign($data);
         $data['categories'] = isset($data['categories']) ? $data['categories'] : array();
         $textData = isset($data['text']) ? $data['text'] : array();
         $tagData = isset($data['tags']) ? $data['tags'] : array();
@@ -203,16 +204,15 @@ class Post extends Entities\Posts
             $this->categories = $categories;
         }
 
-        $this->assign($data);
         if (!$this->save()) {
             throw new Exception\RuntimeException('Create post failed');
         }
-
         return $this;
     }
 
     public function updatePost($data)
     {
+        $this->assign($data);
         $data['categories'] = isset($data['categories']) ? $data['categories'] : array();
         $textData = $data['text'];
         $tagData = $data['tags'];
@@ -254,7 +254,6 @@ class Post extends Entities\Posts
             $this->categories = $categories;
         }
 
-        $this->assign($data);
         if (!$this->save()) {
             throw new Exception\RuntimeException('Update post failed');
         }
@@ -309,7 +308,7 @@ class Post extends Entities\Posts
 
     public function getContentHtml()
     {
-        if (!$this->text) {
+        if (empty($this->text->content)) {
             return '';
         }
         if ($this->codeType == 'markdown') {

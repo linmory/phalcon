@@ -63,8 +63,10 @@ class Model extends \Phalcon\Mvc\Model
                             $subdatas[] = $child->dump($subdata);
                         }
                         $data[$key] = $subdatas;
-                    } else {
+                    } elseif(method_exists($this->$key, 'dump')) {
                         $data[$key] = $this->$key->dump($subdata);
+                    } else {
+                        $data[$key] = null;
                     }
                 } else {
                     $data[$key] = null;

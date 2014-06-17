@@ -445,9 +445,12 @@ class Engine
             return $self->diTranslate();
         });
 
-        $di->set('logException', function () use ($di) {
-            $config = $di->get('config');
+        $di->set('fileSystem', function() use ($self) {
+            return $self->diFileSystem();
+        });
 
+        $di->set('logException', function () use ($di) {
+            $config = $di->getConfig();
             return $logger = new FileLogger($config->logger->path . 'error_' . date('Y-m-d') . '.log');
         });
 
@@ -744,6 +747,16 @@ class Engine
             'delimiter' => ',',
         ));
         return $translate;
+    }
+
+    public function diFileSystem()
+    {
+        $config = $this->getDI()->getConfig();
+        $adapterKey = ucfirst($config->filesystem->adapter);
+        $adapterClass = "Gaufrette\\Adapter\\$adapterKey";
+        $adapter = new $adapterClass($config->filesystem->options);
+        $filesystem = new \Gaufrette\Filesystem($adapter);
+        return $filesystem;
     }
 
     public function bootstrap()
