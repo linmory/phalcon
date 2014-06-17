@@ -6,6 +6,25 @@ use Eva\EvaFileSystem\Entities\Files;
 
 class FileManager extends Files
 {
+    public static $defaultDump = array(
+        'id',
+        'title',
+        'url' => 'getFullUrl',
+        'localUrl' => 'getLocalUrl',
+        'description',
+        'fileExtension',
+        'fileHash',
+        'fileSize',
+        'readableFileSize' => 'getReadableFileSize',
+        'isImage',
+        'imageWidth',
+        'imageHeight',
+        'sortOrder',
+        'userId',
+        'userName',
+        'createdAt',
+    );
+
     public function findFiles(array $query = array())
     {
         $itemQuery = $this->getDI()->getModelsManager()->createBuilder();
