@@ -109,7 +109,38 @@ class User extends Entities\Users
 
     public function createUser($data)
     {
+        $profileData = empty($data['profile']) ? array() : $data['profile'];
+        $profile = new Profile();
+        $profile->assign($profileData);
+        $this->profile = $profile;
 
+        $this->assign($data);
+        if (!$this->save()) {
+            throw new Exception\RuntimeException('Create user failed');
+        }
+
+        return $this;
+    }
+
+    public function updateUser($data)
+    {
+        $profileData = empty($data['profile']) ? array() : $data['profile'];
+        $profile = new Profile();
+        $profile->assign($profileData);
+        $this->profile = $profile;
+
+        $this->assign($data);
+        if (!$this->save()) {
+            throw new Exception\RuntimeException('Create user failed');
+        }
+
+        return $this;
+    }
+
+    public function removeUser($id)
+    {
+        $this->id = $id;
+        $this->delete();
     }
 
 }

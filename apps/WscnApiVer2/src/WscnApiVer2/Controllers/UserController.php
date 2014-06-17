@@ -21,19 +21,6 @@ use Eva\EvaEngine\Exception;
  */
 class UserController extends ControllerBase
 {
-    public function initialize()
-    {
-        return $this->response->setJsonContent(array(
-            'paginator' => 1,
-            'results' => 2,
-        ));
-    }
-
-    public function afterExecuteRoute($dispatcher)
-    {
-        parent::afterExecuteRoute($dispatcher);
-    }
-
     /**
      *
      * @SWG\Api(
@@ -96,12 +83,6 @@ class UserController extends ControllerBase
             'page' => $this->request->getQuery('page', 'int', 1),
         );
 
-        $cacheKey = md5($this->request->getURI());
-        $cache = $this->getDI()->get('apiCache');
-        if($data = $cache->get($cacheKey)) {
-            return $this->response->setJsonContent($data);
-        }
-
         $form = new Forms\FilterForm();
         $form->setValues($this->request->getQuery());
 
@@ -126,7 +107,6 @@ class UserController extends ControllerBase
             'paginator' => $this->getApiPaginator($paginator),
             'results' => $userArray,
         );
-        $cache->save($cacheKey, $data, 60);
         return $this->response->setJsonContent($data);
     }
 
@@ -166,12 +146,6 @@ class UserController extends ControllerBase
      */
     public function getAction()
     {
-        $cacheKey = md5($this->request->getURI());
-        $cache = $this->getDI()->get('apiCache');
-        if($data = $cache->get($cacheKey)) {
-            return $this->response->setJsonContent($data);
-        }
-
         $id = $this->dispatcher->getParam('id');
         $userModel = new Models\User();
         $user = $userModel->findFirst($id);
@@ -179,7 +153,6 @@ class UserController extends ControllerBase
             throw new Exception\ResourceNotFoundException('Request user not exist');
         }
         $user = $user->dump(Models\User::$defaultDump);
-        $cache->save($cacheKey, $user, 60);
         return $this->response->setJsonContent($user);
     }
 
@@ -244,6 +217,7 @@ class UserController extends ControllerBase
 
         $form = new Forms\UserForm();
         $form->setModel($user);
+        $form->addForm('profile', 'Eva\EvaUser\Forms\ProfileForm');
 
         if (!$form->isFullValid($data)) {
             return $this->displayJsonInvalidMessages($form);
@@ -305,7 +279,7 @@ class UserController extends ControllerBase
         $form = new Forms\UserForm();
         $user = new Models\User();
         $form->setModel($user);
-        $form->addForm('text', 'Eva\EvaUser\Forms\ProfileForm');
+        $form->addForm('profile', 'Eva\EvaUser\Forms\ProfileForm');
 
         if (!$form->isFullValid($data)) {
             return $this->displayJsonInvalidMessages($form);
