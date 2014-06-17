@@ -12,7 +12,7 @@ class IndexController extends ControllerBase
     {
         $cacheKey = 'node-' . md5($this->request->getURI());
         $this->view->cache(array(
-            'lifetime' => 3600,
+            'lifetime' => 180,
             'key' => $cacheKey,
         ));
         if($this->view->getCache()->exists($cacheKey)) {
