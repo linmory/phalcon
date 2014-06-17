@@ -1,6 +1,5 @@
 AddDefaultCharset UTF-8
 SetEnv APPLICATION_ENV development
-SetEnv APPLICATION_NAME wscnwap
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
