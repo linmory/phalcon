@@ -206,7 +206,7 @@ $(document).ready(function(){
 		
 		$(".news-more span").html("正在加载");
 		$.get("/?page=" + page,function(result){
-			$(".news-more span").html("正在更多");
+			$(".news-more span").html("加载更多");
 			var newsList = $(".news-list a",result);//.insertAfter(".news-list:last");
 			updateTimeLabel(newsList.find(".agotime"));
 			newsList.insertAfter(".news-list a:last");
