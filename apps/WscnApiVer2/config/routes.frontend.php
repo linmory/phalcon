@@ -113,4 +113,53 @@ return array(
         ),
         'httpMethods' => 'DELETE'
     ),
+    'medialist' =>  array(
+        'pattern' => '/v2/media',
+        'paths' => array(
+            'module' => 'WscnApiVer2',
+            'controller' => 'media',
+            'action' => 'index',
+        ),
+        'httpMethods' => 'GET'
+    ),
+    'createmedia' =>  array(
+        'pattern' => '/v2/media',
+        'paths' => array(
+            'module' => 'WscnApiVer2',
+            'controller' => 'media',
+            'action' => 'media',
+        ),
+        'httpMethods' => 'POST'
+    ),
+    'getmedia' =>  array(
+        'pattern' => '/v2/media/(\d+)',
+        'paths' => array(
+            'module' => 'WscnApiVer2',
+            'controller' => 'media',
+            'action' => 'get',
+            'id' => 1,
+        ),
+        'httpMethods' => 'GET'
+    ),
+    'putmedia' =>  array(
+        'pattern' => '/v2/media/(\d+)',
+        'paths' => array(
+            'module' => 'WscnApiVer2',
+            'controller' => 'media',
+            'action' => 'put',
+            'id' => 1,
+        ),
+        'httpMethods' => 'PUT'
+    ),
+    'deletemedia' =>  array(
+        'pattern' => '/v2/media/(\d+)',
+        'paths' => array(
+            'module' => 'WscnApiVer2',
+            'controller' => 'media',
+            'action' => 'delete',
+            'id' => 1,
+        ),
+        'httpMethods' => 'DELETE'
+    ),
+
 );
