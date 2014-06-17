@@ -1093,6 +1093,9 @@ label.checkbox.right {
   font-style: normal;
   font-weight: 400;
 }
+.article.page em {
+  font-style: italic;
+}
 .article.page ul,
 .article.page ol {
   list-style: none;
