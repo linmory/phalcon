@@ -3,8 +3,8 @@
 namespace WscnApiVer2\Controllers;
 
 use Swagger\Annotations as SWG;
-use Eva\EvaBlog\Models;
-use Eva\EvaBlog\Forms;
+use Eva\EvaFileSystem\Models;
+use Eva\EvaFileSystem\Forms;
 use Eva\EvaEngine\Exception;
 
 /**
@@ -15,23 +15,23 @@ use Eva\EvaEngine\Exception;
  * @SWG\Resource(
  *  apiVersion="0.2",
  *  swaggerVersion="1.2",
- *  resourcePath="/post",
+ *  resourcePath="/media",
  *  basePath="/v2"
  * )
  */
-class PostController extends ControllerBase
+class MediaController extends ControllerBase
 {
     /**
      *
      * @SWG\Api(
-     *   path="/post",
-     *   description="Post related api",
+     *   path="/media",
+     *   description="Media related api",
      *   produces="['application/json']",
      *   @SWG\Operations(
      *     @SWG\Operation(
      *       method="GET",
-     *       summary="Get post list",
-     *       notes="Returns a post based on ID",
+     *       summary="Get media list",
+     *       notes="Returns a media based on ID",
      *       @SWG\Parameters(
      *         @SWG\Parameter(
      *           name="q",
@@ -89,7 +89,9 @@ class PostController extends ControllerBase
         $query = array(
             'q' => $this->request->getQuery('q', 'string'),
             'status' => $this->request->getQuery('status', 'string'),
-            'username' => $this->request->getQuery('username', 'string'),
+            'uid' => $this->request->getQuery('uid', 'int'),
+            'extension' => $this->request->getQuery('extension', 'string'),
+            'image' => $this->request->getQuery('image', 'int'),
             'order' => $order,
             'limit' => $limit,
             'page' => $this->request->getQuery('page', 'int', 1),
@@ -98,46 +100,26 @@ class PostController extends ControllerBase
         $form = new Forms\FilterForm();
         $form->setValues($this->request->getQuery());
 
-        $post = new Models\Post();
-        $posts = $post->findPosts($query);
+        $fileManager = new Models\FileManager();
+        $medias = $fileManager->findFiles($query);
         $paginator = new \Eva\EvaEngine\Paginator(array(
-            "builder" => $posts,
+            "builder" => $medias,
             "limit"=> $limit,
             "page" => $query['page']
         ));
         $paginator->setQuery($query);
         $pager = $paginator->getPaginate();
 
-        $postArray = array();
+        $mediaArray = array();
         if ($pager->items) {
-            foreach ($pager->items as $key => $post) {
-                $postArray[] = $post->dump(array(
-                    'id',
-                    'title',
-                    'codeType',
-                    'createdAt',
-                    'summary',
-                    'summaryHtml' => 'getSummaryHtml',
-                    'commentStatus',
-                    'sourceName',
-                    'sourceUrl',
-                    'url' => 'getUrl',
-                    'imageUrl' => 'getImageUrl',
-                    'tags' => array(
-                        'id',
-                        'tagName',
-                    ),
-                    'user' => array(
-                        'id',
-                        'username',
-                    ),
-                ));
+            foreach ($pager->items as $key => $media) {
+                $mediaArray[] = $media->dump(Models\FileManager::$defaultDump);
             }
         }
 
         $data = array(
             'paginator' => $this->getApiPaginator($paginator),
-            'results' => $postArray,
+            'results' => $mediaArray,
         );
         return $this->response->setJsonContent($data);
     }
@@ -145,18 +127,18 @@ class PostController extends ControllerBase
     /**
     *
     * @SWG\Api(
-        *   path="/post/{postId}",
-        *   description="Post related api",
+        *   path="/media/{mediaId}",
+        *   description="Media related api",
         *   produces="['application/json']",
         *   @SWG\Operations(
             *     @SWG\Operation(
                 *       method="GET",
-                *       summary="Find post by ID",
-     *       notes="Returns a post based on ID",
+                *       summary="Find media by ID",
+     *       notes="Returns a media based on ID",
      *       @SWG\Parameters(
      *         @SWG\Parameter(
-     *           name="postId",
-     *           description="ID of post",
+     *           name="mediaId",
+     *           description="ID of media",
      *           paramType="path",
      *           required=true,
      *           type="integer"
@@ -169,7 +151,7 @@ class PostController extends ControllerBase
      *          ),
      *          @SWG\ResponseMessage(
      *            code=404,
-     *            message="post not found"
+     *            message="media not found"
      *          )
      *       )
      *     )
@@ -179,30 +161,30 @@ class PostController extends ControllerBase
     public function getAction()
     {
         $id = $this->dispatcher->getParam('id');
-        $postModel = new Models\Post();
-        $post = $postModel->findFirst($id);
-        if (!$post) {
-            throw new Exception\ResourceNotFoundException('Request post not exist');
+        $mediaModel = new Models\FileManager();
+        $media = $mediaModel->findFirst($id);
+        if (!$media) {
+            throw new Exception\ResourceNotFoundException('Request media not exist');
         }
-        $post = $post->dump(Models\Post::$defaultDump);
-        return $this->response->setJsonContent($post);
+        $media = $media->dump(Models\FileManager::$defaultDump);
+        return $this->response->setJsonContent($media);
     }
 
     /**
      *
      * @SWG\Api(
-     *   path="/post/{postId}",
-     *   description="Post related api",
+     *   path="/media/{mediaId}",
+     *   description="Media related api",
      *   produces="['application/json']",
      *   @SWG\Operations(
      *     @SWG\Operation(
      *       method="PUT",
-     *       summary="Update post by ID",
-     *       notes="Returns updated post",
+     *       summary="Update media by ID",
+     *       notes="Returns updated media",
      *       @SWG\Parameters(
      *         @SWG\Parameter(
-     *           name="postId",
-     *           description="ID of post",
+     *           name="mediaId",
+     *           description="ID of media",
      *           paramType="path",
      *           required=true,
      *           type="integer"
@@ -210,8 +192,8 @@ class PostController extends ControllerBase
      *       ),
      *       @SWG\Parameters(
      *         @SWG\Parameter(
-     *           name="postData",
-     *           description="Post info",
+     *           name="mediaData",
+     *           description="Media info",
      *           paramType="body",
      *           required=true,
      *           type="string"
@@ -224,7 +206,7 @@ class PostController extends ControllerBase
      *          ),
      *          @SWG\ResponseMessage(
      *            code=404,
-     *            message="post not found"
+     *            message="media not found"
      *          )
      *       )
      *     )
@@ -242,23 +224,15 @@ class PostController extends ControllerBase
              throw new Exception\InvalidArgumentException('Data not able to decode as JSON');
          }
 
-         $post = Models\Post::findFirst($id);
-         if (!$post) {
-             throw new Exception\ResourceNotFoundException('Request post not exist');
+         $media = Models\FileManager::findFirst($id);
+         if (!$media) {
+             throw new Exception\ResourceNotFoundException('Request media not exist');
          }
 
-        $form = new Forms\PostForm();
-        $form->setModel($post);
-        $form->addForm('text', 'Eva\EvaBlog\Forms\TextForm');
-
-
-        if (!$form->isFullValid($data)) {
-            return $this->displayJsonInvalidMessages($form);
-        }
-
         try {
-            $form->save('updatePost');
-            $data = $post->dump(Models\Post::$defaultDump);
+            $media->assign($data);
+            $media->save();
+            $data = $media->dump(Models\FileManager::$defaultDump);
             return $this->response->setJsonContent($data);
         } catch (\Exception $e) {
             return $this->displayExceptionForJson($e, $form->getModel()->getMessages());
@@ -268,21 +242,21 @@ class PostController extends ControllerBase
      /**
      *
      * @SWG\Api(
-     *   path="/post",
-     *   description="Post related api",
+     *   path="/media",
+     *   description="Media related api",
      *   produces="['application/json']",
      *   @SWG\Operations(
      *     @SWG\Operation(
      *       method="POST",
-     *       summary="Create new post",
-     *       notes="Returns a post based on ID",
+     *       summary="Create new media",
+     *       notes="Returns a media based on ID",
      *       @SWG\Parameters(
      *         @SWG\Parameter(
-     *           name="post json",
-     *           description="Post info",
+     *           name="upload",
+     *           description="Media info",
      *           paramType="body",
      *           required=true,
-     *           type="string"
+     *           type="file"
      *         )
      *       ),
      *       @SWG\ResponseMessages(
@@ -292,56 +266,49 @@ class PostController extends ControllerBase
      *          ),
      *          @SWG\ResponseMessage(
      *            code=404,
-     *            message="post not found"
+     *            message="media not found"
      *          )
      *       )
      *     )
      *   )
      * )
      */
-    public function postAction()
+    public function mediaAction()
     {
-        $data = $this->request->getRawBody();
-        if (!$data) {
+        if (!$this->request->isPost() || !$this->request->hasFiles()) {
             throw new Exception\InvalidArgumentException('No data input');
         }
-        if (!$data = json_decode($data, true)) {
-            throw new Exception\InvalidArgumentException('Data not able to decode as JSON');
-        }
 
-        $form = new Forms\PostForm();
-        $post = new Models\Post();
-        $form->setModel($post);
-        $form->addForm('text', 'Eva\EvaBlog\Forms\TextForm');
-
-        if (!$form->isFullValid($data)) {
-            return $this->displayJsonInvalidMessages($form);
-        }
-
+        $upload = new Models\Upload();
         try {
-            $form->save('createPost');
-            $data = $post->dump(Models\Post::$defaultDump);
-            return $this->response->setJsonContent($data);
+            $files = $this->request->getUploadedFiles();
+            //Only allow upload the first file by force
+            $file = $files[0];
+            $file = $upload->upload($file);
+            if ($file) {
+                $data = $file->dump(Models\FileManager::$defaultDump);
+                return $this->response->setJsonContent($data);
+            }
         } catch (\Exception $e) {
-            return $this->displayExceptionForJson($e, $form->getModel()->getMessages());
+            return $this->displayExceptionForJson($e, $upload->getMessages());
         }
     }
 
     /**
     *
      * @SWG\Api(
-     *   path="/post/{postId}",
-     *   description="Post related api",
+     *   path="/media/{mediaId}",
+     *   description="Media related api",
      *   produces="['application/json']",
      *   @SWG\Operations(
      *     @SWG\Operation(
      *       method="DELETE",
-     *       summary="Delete post by ID",
-     *       notes="Returns deleted post",
+     *       summary="Delete media by ID",
+     *       notes="Returns deleted media",
      *       @SWG\Parameters(
      *         @SWG\Parameter(
-     *           name="postId",
-     *           description="ID of post",
+     *           name="mediaId",
+     *           description="ID of media",
      *           paramType="path",
      *           required=true,
      *           type="integer"
@@ -354,16 +321,16 @@ class PostController extends ControllerBase
     public function deleteAction()
     {
          $id = $this->dispatcher->getParam('id');
-         $post = Models\Post::findFirst($id);
-         if (!$post) {
-             throw new Exception\ResourceNotFoundException('Request post not exist');
+         $media = Models\FileManager::findFirst($id);
+         if (!$media) {
+             throw new Exception\ResourceNotFoundException('Request media not exist');
          }
-         $postinfo = $post->dump(Models\Post::$defaultDump);
+         $mediainfo = $media->dump(Models\FileManager::$defaultDump);
          try {
-             $post->removePost($id);
-             return $this->response->setJsonContent($postinfo);
+             $media->delete($id);
+             return $this->response->setJsonContent($mediainfo);
          } catch (\Exception $e) {
-             return $this->displayExceptionForJson($e, $post->getMessages());
+             return $this->displayExceptionForJson($e, $media->getMessages());
          }
     }
 }

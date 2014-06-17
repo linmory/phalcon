@@ -19,7 +19,7 @@ if ( version_compare(phpversion(), '5.3.0', '<') ) {
 require __DIR__ . '/../../init_autoloader.php';
 
 $engine = new \Eva\EvaEngine\Engine(__DIR__ . '/../../');
-$engine->bootstrap();
+$engine->loadModules(array("EvaCommon"))->bootstrap();
 $localConfig = $engine->getDI()->get('config');
 
 $config = new EvaThumber\Config\Config(include __DIR__ . '/config.default.php');
