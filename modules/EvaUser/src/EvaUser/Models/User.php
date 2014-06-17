@@ -73,7 +73,7 @@ class User extends Entities\Users
 
     public function findUsers(array $query = array())
     {
-        $itemQuery = $this->getDI()->get('modelsManager')->createBuilder();
+        $itemQuery = $this->getDI()->getModelsManager()->createBuilder();
 
         $itemQuery->from(__CLASS__);
 

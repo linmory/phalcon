@@ -3,10 +3,10 @@
 namespace Eva\EvaFileSystem\Controllers\Admin;
 
 use Eva\EvaFileSystem\Models;
+use Eva\EvaEngine\Mvc\Controller\JsonControllerInterface;
 
-class UploadController extends ControllerBase
+class UploadController extends ControllerBase implements JsonControllerInterface
 {
-
     /**
      * Index action
      */
@@ -14,8 +14,6 @@ class UploadController extends ControllerBase
      {
          if (!$this->request->isPost() || !$this->request->hasFiles()) {
              $this->response->setStatusCode('400', 'No Upload Files');
-             $this->response->setContentType('application/json', 'utf-8');
-
              return $this->response->setJsonContent(array(
                  'errors' => array(
                      array(
@@ -41,20 +39,13 @@ class UploadController extends ControllerBase
          }
 
          $this->response->setContentType('application/json', 'utf-8');
-
          return $this->response->setJsonContent($fileinfo);
-    }
-
-    public function testAction()
-    {
     }
 
     public function encodeAction()
     {
          if (!$this->request->isPost()) {
              $this->response->setStatusCode('400', 'No Upload Files');
-             $this->response->setContentType('application/json', 'utf-8');
-
              return $this->response->setJsonContent(array(
                  'errors' => array(
                      array(
@@ -78,9 +69,6 @@ class UploadController extends ControllerBase
          } catch (\Exception $e) {
              return $this->displayExceptionForJson($e, $upload->getMessages());
          }
-
-         $this->response->setContentType('application/json', 'utf-8');
-
          return $this->response->setJsonContent($fileinfo);
     }
 }
