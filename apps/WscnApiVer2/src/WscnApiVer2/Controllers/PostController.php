@@ -89,6 +89,8 @@ class PostController extends ControllerBase
         $query = array(
             'q' => $this->request->getQuery('q', 'string'),
             'status' => $this->request->getQuery('status', 'string'),
+            'uid' => $this->request->getQuery('uid', 'int'),
+            'cid' => $this->request->getQuery('cid', 'int'),
             'username' => $this->request->getQuery('username', 'string'),
             'order' => $order,
             'limit' => $limit,
