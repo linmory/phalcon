@@ -121,7 +121,7 @@
 			padding:5px 30px;
 			color:#0f496d;
 			border-radius: 5px;
-			
+			cursor:pointer;
 		}
 	
 		.news-info{
@@ -181,17 +181,37 @@
 <script src="http://cdn.static.wallstreetcn.com/js/moment-with-langs.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function(){
-    moment.lang('zh-cn');
-	$(".agotime").each(function(){
+
+function updateTimeLabel($list){
+	$list.each(function(){
 		var time = $(this);
         time.html(moment(time.attr("data-timestamp") * 1000).fromNow());
 	});
+}
+
+$(document).ready(function(){
+    moment.lang('zh-cn');
+	
+	updateTimeLabel($(".agotime"));
 	
 	//fix firefox,ie max-width bug
 	if(/firefox/.test(navigator.userAgent.toLowerCase()) || !!window.ActiveXObject || "ActiveXObject" in window){
 		$(".home img,.app-download img").css("max-width","50%");
 	}
+	
+	$(".news-more").click(function(){
+		var hash = document.location.hash,page;
+		hash == "" ? (page = 1) : (page = 1 * hash.split("=")[1] + 1);
+		document.location.hash = "page=" + page;
+		
+		$(".news-more span").html("正在加载");
+		$.get("/?page=" + page,function(result){
+			$(".news-more span").html("正在更多");
+			var newsList = $(".news-list a",result);//.insertAfter(".news-list:last");
+			updateTimeLabel(newsList.find(".agotime"));
+			newsList.insertAfter(".news-list a:last");
+		});
+	});
 });
 </script>
 
