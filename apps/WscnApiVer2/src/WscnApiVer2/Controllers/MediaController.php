@@ -224,23 +224,15 @@ class MediaController extends ControllerBase
              throw new Exception\InvalidArgumentException('Data not able to decode as JSON');
          }
 
-         $media = Models\Media::findFirst($id);
+         $media = Models\FileManager::findFirst($id);
          if (!$media) {
              throw new Exception\ResourceNotFoundException('Request media not exist');
          }
 
-        $form = new Forms\MediaForm();
-        $form->setModel($media);
-        $form->addForm('text', 'Eva\EvaFileSystem\Forms\TextForm');
-
-
-        if (!$form->isFullValid($data)) {
-            return $this->displayJsonInvalidMessages($form);
-        }
-
         try {
-            $form->save('updateMedia');
-            $data = $media->dump(Models\Media::$defaultDump);
+            $media->assign($data);
+            $media->save();
+            $data = $media->dump(Models\FileManager::$defaultDump);
             return $this->response->setJsonContent($data);
         } catch (\Exception $e) {
             return $this->displayExceptionForJson($e, $form->getModel()->getMessages());
@@ -260,11 +252,11 @@ class MediaController extends ControllerBase
      *       notes="Returns a media based on ID",
      *       @SWG\Parameters(
      *         @SWG\Parameter(
-     *           name="media json",
+     *           name="upload",
      *           description="Media info",
      *           paramType="body",
      *           required=true,
-     *           type="string"
+     *           type="file"
      *         )
      *       ),
      *       @SWG\ResponseMessages(
@@ -283,29 +275,22 @@ class MediaController extends ControllerBase
      */
     public function mediaAction()
     {
-        $data = $this->request->getRawBody();
-        if (!$data) {
+        if (!$this->request->isPost() || !$this->request->hasFiles()) {
             throw new Exception\InvalidArgumentException('No data input');
         }
-        if (!$data = json_decode($data, true)) {
-            throw new Exception\InvalidArgumentException('Data not able to decode as JSON');
-        }
 
-        $form = new Forms\MediaForm();
-        $media = new Models\Media();
-        $form->setModel($media);
-        $form->addForm('text', 'Eva\EvaFileSystem\Forms\TextForm');
-
-        if (!$form->isFullValid($data)) {
-            return $this->displayJsonInvalidMessages($form);
-        }
-
+        $upload = new Models\Upload();
         try {
-            $form->save('createMedia');
-            $data = $media->dump(Models\Media::$defaultDump);
-            return $this->response->setJsonContent($data);
+            $files = $this->request->getUploadedFiles();
+            //Only allow upload the first file by force
+            $file = $files[0];
+            $file = $upload->upload($file);
+            if ($file) {
+                $data = $file->dump(Models\FileManager::$defaultDump);
+                return $this->response->setJsonContent($data);
+            }
         } catch (\Exception $e) {
-            return $this->displayExceptionForJson($e, $form->getModel()->getMessages());
+            return $this->displayExceptionForJson($e, $upload->getMessages());
         }
     }
 
@@ -336,13 +321,13 @@ class MediaController extends ControllerBase
     public function deleteAction()
     {
          $id = $this->dispatcher->getParam('id');
-         $media = Models\Media::findFirst($id);
+         $media = Models\FileManager::findFirst($id);
          if (!$media) {
              throw new Exception\ResourceNotFoundException('Request media not exist');
          }
-         $mediainfo = $media->dump(Models\Media::$defaultDump);
+         $mediainfo = $media->dump(Models\FileManager::$defaultDump);
          try {
-             $media->removeMedia($id);
+             $media->delete($id);
              return $this->response->setJsonContent($mediainfo);
          } catch (\Exception $e) {
              return $this->displayExceptionForJson($e, $media->getMessages());
