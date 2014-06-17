@@ -85,7 +85,7 @@ class PostController extends ControllerBase
         $limit = $this->request->getQuery('limit', 'int', 25);
         $limit = $limit > 100 ? 100 : $limit;
         $limit = $limit < 3 ? 3 : $limit;
-        $order = $this->request->getQuery('order', 'string', 'id');
+        $order = $this->request->getQuery('order', 'string', '-created_at');
         $query = array(
             'q' => $this->request->getQuery('q', 'string'),
             'status' => $this->request->getQuery('status', 'string'),
