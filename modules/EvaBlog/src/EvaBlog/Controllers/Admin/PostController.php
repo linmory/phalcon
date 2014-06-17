@@ -17,12 +17,6 @@ class PostController extends ControllerBase
         $limit = $this->request->getQuery('limit', 'int', 25);
         $limit = $limit > 100 ? 100 : $limit;
         $limit = $limit < 10 ? 10 : $limit;
-        $orderMapping = array(
-            'id' => 'id ASC',
-            '-id' => 'id DESC',
-            'created_at' => 'createdAt ASC',
-            '-created_at' => 'createdAt DESC',
-        );
         $order = $this->request->getQuery('order', 'string', '-created_at');
         $query = array(
             'q' => $this->request->getQuery('q', 'string'),
@@ -37,8 +31,8 @@ class PostController extends ControllerBase
 
         $form = new Forms\FilterForm();
         $form->setValues($this->request->getQuery());
-
         $this->view->setVar('form', $form);
+
         $post = new Models\Post();
         $posts = $post->findPosts($query);
         $paginator = new \Eva\EvaEngine\Paginator(array(

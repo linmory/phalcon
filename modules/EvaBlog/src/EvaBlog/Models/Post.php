@@ -113,7 +113,7 @@ class Post extends Entities\Posts
     {
         $itemQuery = $this->getDI()->get('modelsManager')->createBuilder();
 
-        $itemQuery->from(get_class($this));
+        $itemQuery->from(__CLASS__);
 
         $orderMapping = array(
             'id' => 'id ASC',
