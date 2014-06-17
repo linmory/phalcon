@@ -41,15 +41,46 @@
                     <div class="col-sm-12">
                         <form class="form-inline">
                             <div class="form-group">
-                                <input type="text" name="q" placeholder="Keyword" class="input-small">
+                                <?=$form->render('q', array(
+                                    'placeholder' => 'Keyword',
+                                    'class' => 'form-control input-sm'
+                                ))?>
                             </div>
-                            <span>
+                            <div class="form-group">
+                                <?=$form->render('status', array(
+                                    'class' => 'form-control input-sm'
+                                ))?>
+                            </div>
+                            <div class="form-group">
+                                <?=$form->render('uid', array())?>
+                                <?=$form->render('username', array(
+                                    'placeholder' => 'Username',
+                                    'class' => 'form-control input-sm autocomplete',
+                                    'data-autocomplete-source' => '/admin/user/process/suggestions?query=%QUERY',
+                                    'data-autocomplete-target' => 'input[name=uid]',
+                                    'data-autocomplete-fill-name' => 'id',
+                                    'data-autocomplete-display-key' => 'username',
+                                ))?>
+                            </div>
+                            <div class="form-group">
+                                <?=$form->render('extension', array(
+                                    'class' => 'form-control input-sm',
+                                    'placeholder' => 'File Extension',
+                                ))?>
+                            </div>
+                            <div class="form-group">
+                                <?=$form->render('image', array(
+                                ))?>
+                            </div>
+                           <span>
                                 <label for="filter-from-limit">Display</label> 
                             </span>
                             <div class="form-group">
-                                <select id="filter-from-limit" size="1" name="limit"><option selected="selected" value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select>
+                                <?=$form->render('per_page', array(
+                                    'class' => 'form-control input-sm'
+                                ))?>
                             </div>
-                            <button class="btn btn-info btn-sm" type="submit">
+                            <button class="btn btn-info btn-sm form-control" type="submit">
                                 <i class="icon-search bigger-110"></i>
                                 Filter 
                             </button>
@@ -57,7 +88,7 @@
 
                     </div>
                 </div>
-                <table class="table table-striped table-bordered table-hover dataTable" id="post-grid">
+                <table class="table table-striped table-bordered table-hover dataTable   table-sortable" id="post-grid"  data-sortable-key="order" data-sortable-default="-created_at">
                     <thead>
                         <tr>
                             <th class="center">
@@ -66,13 +97,17 @@
                                     <span class="lbl"></span>
                                 </label>
                             </th>
-                            <th class="hidden-480">ID</th>
+                            <th class="hidden-480">
+                                <a href="<?=$this->tag->uri('/admin/media', $pager->query)?>" class="sortable-link" data-sortable-value="id">ID</a>
+                            </th>
                             <th>Filename</th>
                             <th class="hidden-480">File Size</th>
                             <th>User</th>
                             <th>
-                                <i class="icon-time bigger-110 hidden-480"></i>
-                                Upload Time
+                                <a href="<?=$this->tag->uri('/admin/media', $pager->query)?>" class="sortable-link" data-sortable-value="created_at" data-sortable-default="-created_at">
+                                    <i class="icon-time bigger-110"></i>
+                                    Upload Time
+                                </a>
                             </th>
                             <th></th>
                         </tr>
