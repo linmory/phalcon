@@ -1,9 +1,10 @@
 <?php
 namespace Eva\EvaComment\Controllers\Admin;
 
-use \Eva\EvaEngine\Mvc\Controller\ControllerBase as Base;
+use Eva\EvaEngine\Mvc\Controller\ControllerBase as AdminControllerBase;
+use Eva\EvaEngine\Mvc\Controller\AuthorityControllerInterface;
 
-class ControllerBase extends Base
+class ControllerBase extends AdminControllerBase implements AuthorityControllerInterface
 {
     public function initialize()
     {
