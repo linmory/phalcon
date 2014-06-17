@@ -483,7 +483,9 @@ address, caption, cite, code, del, em, th, var {
     font-style: normal;
     font-weight: 500;
 }
-
+em {
+    font-style: italic;
+}
 /* 对齐是排版最重要的因素, 别让什么都居中 */
 caption, th {
     text-align: left;
