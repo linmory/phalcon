@@ -95,12 +95,6 @@ class PostController extends ControllerBase
             'page' => $this->request->getQuery('page', 'int', 1),
         );
 
-        $cacheKey = md5($this->request->getURI());
-        $cache = $this->getDI()->get('apiCache');
-        if($data = $cache->get($cacheKey)) {
-            return $this->response->setJsonContent($data);
-        }
-
         $form = new Forms\FilterForm();
         $form->setValues($this->request->getQuery());
 
@@ -145,7 +139,6 @@ class PostController extends ControllerBase
             'paginator' => $this->getApiPaginator($paginator),
             'results' => $postArray,
         );
-        $cache->save($cacheKey, $data, 60);
         return $this->response->setJsonContent($data);
     }
 
@@ -185,12 +178,6 @@ class PostController extends ControllerBase
      */
     public function getAction()
     {
-        $cacheKey = md5($this->request->getURI());
-        $cache = $this->getDI()->get('apiCache');
-        if($data = $cache->get($cacheKey)) {
-            return $this->response->setJsonContent($data);
-        }
-
         $id = $this->dispatcher->getParam('id');
         $postModel = new Models\Post();
         $post = $postModel->findFirst($id);
@@ -198,7 +185,6 @@ class PostController extends ControllerBase
             throw new Exception\ResourceNotFoundException('Request post not exist');
         }
         $post = $post->dump(Models\Post::$defaultDump);
-        $cache->save($cacheKey, $post, 60);
         return $this->response->setJsonContent($post);
     }
 
