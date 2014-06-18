@@ -3,7 +3,11 @@
 //Send email by Gearman queue
 require __DIR__ . '/../init_autoloader.php';
 
+$appName = isset($argv[1]) ? $argv[1] : null;
 $engine = new \Eva\EvaEngine\Engine(__DIR__ . '/..');
+if($appName) {
+    $engine->setAppName($appName);
+}
 $engine
     ->loadModules(include __DIR__ . '/../config/modules.' . $engine->getAppName() . '.php')
     ->bootstrap();
@@ -11,7 +15,7 @@ $engine
 $worker = $engine->getDI()->getWorker();
 $worker->addFunction('sendmailAsync', 'sendmailAsync');
 
-$logger = new Phalcon\Logger\Adapter\File($engine->getDI()->get('config')->logger->path . 'worker_sendmail_' .  date('Y-m-d') . '.log');
+$logger = new Phalcon\Logger\Adapter\File($engine->getDI()->getConfig()->logger->path . 'worker_sendmail_' .  date('Y-m-d') . '.log');
 
 function sendmailAsync($job)
 {
