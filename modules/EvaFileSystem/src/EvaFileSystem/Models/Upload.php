@@ -5,9 +5,30 @@ namespace Eva\EvaFileSystem\Models;
 use Eva\EvaFileSystem\Entities\Files;
 use Eva\EvaUser\Models\Login as LoginModel;
 use Eva\EvaEngine\Exception;
+use Phalcon\Text;
+use Phalcon\Tag;
+use Phalcon\Http\Request\File;
+use Phalcon\Mvc\Model\Validator;
+use Eva\EvaEngine\Mvc\Model\Validator\Between;
 
 class Upload extends Files
 {
+    public function beforeValidationOnCreate()
+    {
+        $config = $this->getConfig();
+
+        $this->validate(new Validator\InclusionIn(array(
+            'field' => 'fileExtension',
+            'domain' => explode(',', $config->allowExtensions),
+        )));
+
+        $this->validate(new Between(array(
+            'field' => 'fileSize',
+            'minimum' => $config->minFileSize,
+            'maximum' => $config->maxFileSize,  //20MB
+        )));
+    }
+
     public function beforeCreate()
     {
         $user = new LoginModel();
@@ -17,7 +38,14 @@ class Upload extends Files
         }
     }
 
-    public function upload(\Phalcon\Http\Request\File $file)
+    public function validation()
+    {
+        if ($this->validationHasFailed() == true) {
+            return false;
+        }
+    }
+
+    public function upload(File $file)
     {
         if ($file->getError()) {
             throw new Exception\IOException('ERR_FILE_UPLOAD_FAILED');
@@ -30,10 +58,9 @@ class Upload extends Files
         $filenameArray = explode(".", $originalName);
         $fileExtension = strtolower(array_pop($filenameArray));
         $originalFileName = implode('.', $filenameArray);
-        $fileName = \Phalcon\Tag::friendlyTitle($originalFileName);
+        $fileName = Tag::friendlyTitle($originalFileName);
         if ($fileName == '-') {
-            $factory = new \RandomLib\Factory();
-            $fileName = $factory->getMediumStrengthGenerator()->generateString(6, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+            $fileName = Text::random(Text::RANDOM_ALNUM, 6);
         }
 
         //hash file less then 10M
@@ -66,13 +93,11 @@ class Upload extends Files
             $fileinfo['imageHeight'] = $image[1];
         }
 
-        $config = $this->getDI()->get('config')->filesystem;
-        $adapter = new \Gaufrette\Adapter\Local($config->uploadPath);
-        $filesystem = new \Gaufrette\Filesystem($adapter);
+        $filesystem = $this->getDI()->getFileSystem();
 
         $path = md5(time());
         $path = str_split($path, 2);
-        $pathlevel = $config->uploadPathlevel;
+        $pathlevel = $this->getUploadPathLevel();
         $pathlevel > 6 ? 6 : $pathlevel;
         $path = array_slice($path, 0, $pathlevel);
         $filePath = implode('/', $path);
@@ -80,9 +105,8 @@ class Upload extends Files
 
         $fileinfo['filePath'] = $filePath;
 
-        $upload = new Upload();
-        $upload->assign($fileinfo);
-        if ($upload->save()) {
+        $this->assign($fileinfo);
+        if ($this->save()) {
             if (!$filesystem->has($path)) {
                 if ($filesystem->write($path, file_get_contents($tmp))) {
                     unlink($tmp);
@@ -95,8 +119,7 @@ class Upload extends Files
         } else {
             throw new Exception\RuntimeException('ERR_FILE_SAVE_TO_DB_FAILED');
         }
-
-        return $upload;
+        return $this;
     }
 
     public function uploadByEncodedData($data, $originalName, $mimeType = null)
@@ -108,9 +131,8 @@ class Upload extends Files
         $fileEncodedData = trim(substr($data, $headPos + 1));
         $data = base64_decode($fileEncodedData);
 
-        $factory = new \RandomLib\Factory();
-        $tmpName = $factory->getMediumStrengthGenerator()->generateString(6, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
-        $tmpPath = $this->getDI()->get('config')->filesystem->uploadTmpPath;
+        $tmpName = Text::random(\Phalcon\Text::RANDOM_ALNUM, 6);
+        $tmpPath = $this->getUploadTmpPath();
         $tmp =  $tmpPath . '/' . $tmpName;
         $adapter = new \Gaufrette\Adapter\Local($tmpPath);
         $filesystem = new \Gaufrette\Filesystem($adapter);
@@ -121,10 +143,9 @@ class Upload extends Files
         $filenameArray = explode(".", $originalName);
         $fileExtension = strtolower(array_pop($filenameArray));
         $originalFileName = implode('.', $filenameArray);
-        $fileName = \Phalcon\Tag::friendlyTitle($originalFileName);
+        $fileName = Tag::friendlyTitle($originalFileName);
         if ($fileName == '-') {
-            $factory = new \RandomLib\Factory();
-            $fileName = $factory->getMediumStrengthGenerator()->generateString(6, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+            $fileName = Text::random(Text::RANDOM_ALNUM, 6);
         }
 
         //hash file less then 10M
@@ -157,13 +178,11 @@ class Upload extends Files
             $fileinfo['imageHeight'] = $image[1];
         }
 
-        $config = $this->getDI()->get('config')->filesystem;
-        $adapter = new \Gaufrette\Adapter\Local($config->uploadPath);
-        $filesystem = new \Gaufrette\Filesystem($adapter);
+        $filesystem = $this->getDI()->getFileSystem();
 
         $path = md5(time());
         $path = str_split($path, 2);
-        $pathlevel = $config->uploadPathlevel;
+        $pathlevel = $this->getUploadPathLevel();
         $pathlevel > 6 ? 6 : $pathlevel;
         $path = array_slice($path, 0, $pathlevel);
         $filePath = implode('/', $path);
@@ -171,9 +190,8 @@ class Upload extends Files
 
         $fileinfo['filePath'] = $filePath;
 
-        $upload = new Upload();
-        $upload->assign($fileinfo);
-        if ($upload->save()) {
+        $this->assign($fileinfo);
+        if ($this->save()) {
             if (!$filesystem->has($path)) {
                 if ($filesystem->write($path, file_get_contents($tmp))) {
                     unlink($tmp);
@@ -187,7 +205,6 @@ class Upload extends Files
             throw new Exception\RuntimeException('ERR_FILE_SAVE_TO_DB_FAILED');
         }
 
-        return $upload;
-
+        return $this;
     }
 }

@@ -2,6 +2,9 @@
 
 namespace Eva\EvaFileSystem\Entities;
 
+use Eva\EvaEngine\Exception;
+
+
 class Files extends \Eva\EvaEngine\Mvc\Model
 {
     protected $tableName = 'file_files';
@@ -120,40 +123,93 @@ class Files extends \Eva\EvaEngine\Mvc\Model
      */
     public $createdAt;
 
-    /**
-     * Independent Column Mapping.
-     */
-    public function columnMap()
+    private $configKey = 'default';
+
+    private $configReady = false;
+
+    private $uploadPath;
+
+    private $uploadTmpPath;
+
+    private $uploadPathlevel;
+
+    private $baseUrlForLocal;
+
+    private $baseUrl;
+
+    public function getUploadPath()
     {
-        return array(
-            'id' => 'id',
-            'title' => 'title',
-            'status' => 'status',
-            'storageAdapter' => 'storageAdapter',
-            'isImage' => 'isImage',
-            'fileName' => 'fileName',
-            'fileExtension' => 'fileExtension',
-            'originalName' => 'originalName',
-            'filePath' => 'filePath',
-            'fileHash' => 'fileHash',
-            'fileSize' => 'fileSize',
-            'mimeType' => 'mimeType',
-            'imageWidth' => 'imageWidth',
-            'imageHeight' => 'imageHeight',
-            'description' => 'description',
-            'sortOrder' => 'sortOrder',
-            'userId' => 'userId',
-            'username' => 'username',
-            'createdAt' => 'createdAt'
-        );
+        $this->readConfig();
+        return $this->uploadPath;
     }
+
+    public function getUploadTmpPath()
+    {
+        $this->readConfig();
+        return $this->uploadTmpPath;
+    }
+
+    public function getUploadPathLevel()
+    {
+        $this->readConfig();
+        return $this->uploadPathLevel;
+    }
+
+    public function getBaseUrlForLocal()
+    {
+        $this->readConfig();
+        return $this->baseUrlForLocal;
+    }
+
+    public function getBaseUrl()
+    {
+        $this->readConfig();
+        return $this->baseUrl;
+    }
+
+    public function setConfigKey($configKey)
+    {
+        $this->configKey = $configKey;
+        return $this;
+    }
+
+    public function getConfigKey()
+    {
+        return $this->configKey;
+    }
+
+    public function getConfig()
+    {
+        $configKey = $this->configKey;
+        if(empty($this->getDI()->getConfig()->filesystem->$configKey)) {
+            throw new Exception\InvalidArgumentException(sprintf('No matched file system config key %s found', $configKey));
+        }
+        return $this->getDI()->getConfig()->filesystem->$configKey;
+    }
+
+    public function readConfig()
+    {
+        if(true === $this->configReady) {
+            return $this;
+        }
+        $config = $this->getConfig();
+
+        $this->uploadPath = $config->uploadPath;
+        $this->uploadTmpPath = $config->uploadTmpPath;
+        $this->uploadPathLevel = $config->uploadPathLevel;
+        $this->baseUrlForLocal = $config->baseUrlForLocal;
+        $this->baseUrl= $config->baseUrl;
+        $this->configReady = true;
+        return $this;
+    }
+
 
     public function getFullUrl()
     {
         if (!$this->id) {
             return '';
         }
-        if ($url = $this->getDI()->get('config')->filesystem->urlBaseForCDN) {
+        if ($url = $this->getBaseUrl()) {
             return $url . '/' . $this->filePath . '/' . $this->fileName;
         }
 
@@ -166,7 +222,7 @@ class Files extends \Eva\EvaEngine\Mvc\Model
             return '';
         }
 
-        return $this->getDI()->get('config')->filesystem->urlBaseForLocal . '/' . $this->filePath . '/' . $this->fileName;
+        return $this->getBaseUrlForLocal() . '/' . $this->filePath . '/' . $this->fileName;
     }
 
     public function getLocalPath()
@@ -175,7 +231,7 @@ class Files extends \Eva\EvaEngine\Mvc\Model
             return '';
         }
 
-        return $this->getDI()->get('config')->filesystem->uploadPath . '/'. $this->filePath . '/' . $this->fileName;
+        return $this->getUploadPath() . '/'. $this->filePath . '/' . $this->fileName;
     }
 
     public function getReadableFileSize()

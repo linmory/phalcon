@@ -2,15 +2,17 @@
 
 return array(
     'filesystem' => array(
-        'adapter' => 'local',
-        'urlBaseForCDN' => '',  //Full http link
-        'urlBaseForLocal' => '',  //Path is better
-        'uploadTmpPath' => __DIR__ . '/../uploads/',
-        'uploadPath' => __DIR__ . '/../uploads/',
-        'uploadPathlevel' => 3,
-        'localBackup' => false,
-        'validator' => array(
-            'maxFileSize' => '1M',
-        )
+        'default' => array(
+            'adapter' => 'local',
+            'options' => array(),
+            'baseUrl' => '',  //Full http link
+            'baseUrlForLocal' => '',  //Path is better
+            'uploadPath' => __DIR__ . '/../uploads/',
+            'uploadTmpPath' => __DIR__ . '/../uploads/',
+            'uploadPathLevel' => 3,
+            'allowExtensions' => 'jpg,png,jpeg,gif,rar,zip,7z,gz,doc,xls,docx,xlsx,pdf',
+            'minFileSize' => 1,
+            'maxFileSize' => 1048576 * 20, //20MB
+        ),
     ),
 );

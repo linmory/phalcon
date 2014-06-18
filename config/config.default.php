@@ -129,11 +129,12 @@ return array(
     ),
 
     'filesystem' => array(
-        'adapter' => 'local',
-        'urlBaseForLocal' => '/uploads',
-        //'urlBaseForCDN' => '',
-        'uploadPath' => __DIR__ . '/../public/uploads/',
-        'uploadTmpPath' => __DIR__ . '/../public/tmp/',
+        'default' => array(
+            'adapter' => 'local',
+            'baseUrlForLocal' => '/uploads',
+            'uploadPath' => __DIR__ . '/../public/uploads/',
+            'uploadTmpPath' => __DIR__ . '/../public/tmp/',
+        ),
     ),
 
     'dbAdapter' => array(

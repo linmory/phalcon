@@ -752,9 +752,9 @@ class Engine
     public function diFileSystem()
     {
         $config = $this->getDI()->getConfig();
-        $adapterKey = ucfirst($config->filesystem->adapter);
+        $adapterKey = ucfirst($config->filesystem->default->adapter);
         $adapterClass = "Gaufrette\\Adapter\\$adapterKey";
-        $adapter = new $adapterClass($config->filesystem->options);
+        $adapter = new $adapterClass($config->filesystem->default->uploadPath);
         $filesystem = new \Gaufrette\Filesystem($adapter);
         return $filesystem;
     }

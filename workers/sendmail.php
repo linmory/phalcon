@@ -4,24 +4,11 @@
 require __DIR__ . '/../init_autoloader.php';
 
 $engine = new \Eva\EvaEngine\Engine(__DIR__ . '/..');
-$engine->loadModules(array(
-    'EvaCore',
-    'EvaUser',
-    'EvaOAuthClient',
-    'EvaOAuthServer',
-    'EvaPost',
-    'Frontend' => array(
-        'className' => 'Eva\Frontend\Module',
-        'path' => __DIR__ . '/../apps/Frontend/Module.php'
-    ),
-    'WscnGold' => array(
-        'className' => 'WscnGold\Module',
-        'path' => __DIR__ . '/../apps/WscnGold/Module.php'
-    ),
-));
-$engine->bootstrap();
+$engine
+    ->loadModules(include __DIR__ . '/../config/modules.' . $engine->getAppName() . '.php')
+    ->bootstrap();
 
-$worker = $engine->getDI()->get('worker');
+$worker = $engine->getDI()->getWorker();
 $worker->addFunction('sendmailAsync', 'sendmailAsync');
 
 $logger = new Phalcon\Logger\Adapter\File($engine->getDI()->get('config')->logger->path . 'worker_sendmail_' .  date('Y-m-d') . '.log');

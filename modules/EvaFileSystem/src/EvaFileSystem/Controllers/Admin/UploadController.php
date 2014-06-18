@@ -23,7 +23,6 @@ class UploadController extends ControllerBase implements JsonControllerInterface
                  ),
              ));
          }
-
          $upload = new Models\Upload();
          try {
              $files = $this->request->getUploadedFiles();
@@ -37,8 +36,6 @@ class UploadController extends ControllerBase implements JsonControllerInterface
          } catch (\Exception $e) {
              return $this->displayExceptionForJson($e, $upload->getMessages());
          }
-
-         $this->response->setContentType('application/json', 'utf-8');
          return $this->response->setJsonContent($fileinfo);
     }
 
