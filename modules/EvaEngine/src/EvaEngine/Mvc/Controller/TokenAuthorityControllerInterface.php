@@ -2,6 +2,6 @@
 
 namespace Eva\EvaEngine\Mvc\Controller;
 
-interface AuthorityControllerInterface
+interface TokenAuthorityControllerInterface
 {
 }

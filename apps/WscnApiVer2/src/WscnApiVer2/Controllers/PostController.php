@@ -31,7 +31,7 @@ class PostController extends ControllerBase
      *     @SWG\Operation(
      *       method="GET",
      *       summary="Get post list",
-     *       notes="Returns a post based on ID",
+     *       notes="Returns post list",
      *       @SWG\Parameters(
      *         @SWG\Parameter(
      *           name="q",
@@ -163,16 +163,6 @@ class PostController extends ControllerBase
      *           required=true,
      *           type="integer"
      *         )
-     *       ),
-     *       @SWG\ResponseMessages(
-     *          @SWG\ResponseMessage(
-     *            code=400,
-     *            message="Invalid ID supplied"
-     *          ),
-     *          @SWG\ResponseMessage(
-     *            code=404,
-     *            message="post not found"
-     *          )
      *       )
      *     )
      *   )
@@ -218,16 +208,6 @@ class PostController extends ControllerBase
      *           required=true,
      *           type="string"
      *         )
-     *       ),
-     *       @SWG\ResponseMessages(
-     *          @SWG\ResponseMessage(
-     *            code=400,
-     *            message="Invalid ID supplied"
-     *          ),
-     *          @SWG\ResponseMessage(
-     *            code=404,
-     *            message="post not found"
-     *          )
      *       )
      *     )
      *   )
@@ -286,16 +266,6 @@ class PostController extends ControllerBase
      *           required=true,
      *           type="string"
      *         )
-     *       ),
-     *       @SWG\ResponseMessages(
-     *          @SWG\ResponseMessage(
-     *            code=400,
-     *            message="Invalid ID supplied"
-     *          ),
-     *          @SWG\ResponseMessage(
-     *            code=404,
-     *            message="post not found"
-     *          )
      *       )
      *     )
      *   )

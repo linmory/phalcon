@@ -3,32 +3,33 @@
 namespace Eva\EvaPermission\Events;
 
 use Eva\EvaEngine\Exception;
-use Eva\EvaEngine\Mvc\Controller\AuthorityControllerInterface;
+use Eva\EvaEngine\Mvc\Controller\SessionAuthorityControllerInterface;
 
 class DispatchListener
 {
     public function beforeExecuteRoute($event)
     {
         $dispatcher = $event->getSource();
-        /*
-        $controller = $dispatcher->getHandlerClass();
-        $action = $dispatcher->getActionName();
-        $ref = new \ReflectionClass($controller);
-        $interfaceNames = $ref->getInterfaceNames();
-
-        //Not need to authority
-        if(false === in_array('Eva\EvaEngine\Mvc\Controller\AuthorityControllerInterface', $interfaceNames)) {
-            return true;
-        }
-        */
         $controller = $dispatcher->getActiveController();
         //Not need to authority
-        if(!($controller instanceof AuthorityControllerInterface)) {
+        if(!($controller instanceof SessionAuthorityControllerInterface)) {
             return true;
         }
 
         $session = $dispatcher->getDI()->getSession();
         $authIdentity = $session->get('auth-identity');
+
+        /*
+        $acl = new \Phalcon\Acl\Adapter\Memory();
+        $acl->setDefaultAction(\Phalcon\Acl::DENY);
+        $roleAdmins = new \Phalcon\Acl\Role("ADMIN", "Super-User role");
+        $roleGuests = new \Phalcon\Acl\Role("Guests");
+        $acl->addRole($roleAdmins);
+        $acl->addRole($roleGuests);
+        $acl->addResource("Eva\EvaUser\Controllers\Admin\UserController", array('index'));
+        $acl->allow("ADMIN", "Eva\EvaUser\Controllers\Admin\UserController", "index");
+        if(!$acl->isAllowed("ADMIN", get_class($controller), "index")) {
+        */
         if(!$authIdentity) {
             $dispatcher->setModuleName('EvaPermission');
             $dispatcher->setNamespaceName('Eva\EvaPermission\Controllers');

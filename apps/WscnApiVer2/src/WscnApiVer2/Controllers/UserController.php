@@ -31,7 +31,7 @@ class UserController extends ControllerBase
      *     @SWG\Operation(
      *       method="GET",
      *       summary="Get user list",
-     *       notes="Returns a user based on ID",
+     *       notes="Returns user list with paginator",
      *       @SWG\Parameters(
      *         @SWG\Parameter(
      *           name="username",
@@ -129,16 +129,6 @@ class UserController extends ControllerBase
      *           required=true,
      *           type="integer"
      *         )
-     *       ),
-     *       @SWG\ResponseMessages(
-     *          @SWG\ResponseMessage(
-     *            code=400,
-     *            message="Invalid ID supplied"
-     *          ),
-     *          @SWG\ResponseMessage(
-     *            code=404,
-     *            message="user not found"
-     *          )
      *       )
      *     )
      *   )
@@ -184,16 +174,6 @@ class UserController extends ControllerBase
      *           required=true,
      *           type="string"
      *         )
-     *       ),
-     *       @SWG\ResponseMessages(
-     *          @SWG\ResponseMessage(
-     *            code=400,
-     *            message="Invalid ID supplied"
-     *          ),
-     *          @SWG\ResponseMessage(
-     *            code=404,
-     *            message="user not found"
-     *          )
      *       )
      *     )
      *   )
@@ -251,16 +231,6 @@ class UserController extends ControllerBase
      *           required=true,
      *           type="string"
      *         )
-     *       ),
-     *       @SWG\ResponseMessages(
-     *          @SWG\ResponseMessage(
-     *            code=400,
-     *            message="Invalid ID supplied"
-     *          ),
-     *          @SWG\ResponseMessage(
-     *            code=404,
-     *            message="user not found"
-     *          )
      *       )
      *     )
      *   )

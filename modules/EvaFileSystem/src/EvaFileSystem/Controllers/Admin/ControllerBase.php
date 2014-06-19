@@ -3,10 +3,10 @@
 namespace Eva\EvaFileSystem\Controllers\Admin;
 
 
-use Eva\EvaEngine\Mvc\Controller\ControllerBase as AdminControllerBase;
-use Eva\EvaEngine\Mvc\Controller\AuthorityControllerInterface;
+use Eva\EvaEngine\Mvc\Controller\AdminControllerBase as AdminControllerBase;
+use Eva\EvaEngine\Mvc\Controller\SessionAuthorityControllerInterface;
 
-class ControllerBase extends AdminControllerBase implements AuthorityControllerInterface
+class ControllerBase extends AdminControllerBase implements SessionAuthorityControllerInterface
 {
     public function initialize()
     {

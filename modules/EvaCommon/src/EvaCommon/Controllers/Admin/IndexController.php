@@ -2,15 +2,20 @@
 
 namespace Eva\EvaCommon\Controllers\Admin;
 
-use Eva\EvaEngine\Mvc\Controller\ControllerBase as AdminControllerBase;
+use Eva\EvaEngine\Mvc\Controller\AdminControllerBase as AdminControllerBase;
 use Eva\EvaEngine\Mvc\Controller\AuthorityControllerInterface;
 
+/**
+* @resourceName Admin Entrance 
+* @resourceDescription
+*/
 class IndexController extends AdminControllerBase
 {
 
     /**
-     * Index action
-     */
+    * @operationName Admin entrance redirect 
+    * @operationDescription
+    */
     public function indexAction()
     {
         $this->view->disable();
@@ -18,6 +23,10 @@ class IndexController extends AdminControllerBase
         return $this->response->redirect('/admin/login');
     }
 
+    /**
+    * @operationName Admin dashboard
+    * @operationDescription
+    */
     public function dashboardAction()
     {
         $this->view->setModuleLayout('EvaCommon', '/views/admin/layouts/layout');

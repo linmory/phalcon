@@ -8,6 +8,7 @@
 
 namespace Eva\EvaPermission\Utils;
 
+use Eva\EvaPermission\Entities;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -48,52 +49,30 @@ class Scanner
         }
 
         $operations = $this->getOperations($controllerClass);
+
+        if(!$operations) {
+            return $this;
+        }
+
+        $resourceModel = new Entities\Resources();
+        $resourceModel->assign($resource);
+        $operationModels = array();
+        foreach($operations as $operation) {
+            $operationModel = new Entities\Operations();
+            $operationModel->assign($operation);
+            $operationModels[] = $operationModel;
+
+        }
+        $resourceModel->operations = $operationModels;
+        if(!$resourceModel->save()) {
+            p($resourceModel->getMessages());
+        }
+        /*
+        p($resource);
+        p($operations);
+        p('-----------------');
+        */
         return $this;
-    }
-
-    protected function getClassName($sourceCode)
-    {
-        $tokens = token_get_all($sourceCode);
-        $tokenLength = count($tokens);
-        for($i = 0; $i < $tokenLength; $i++) {
-
-            if(isset($tokens[$i][1]) && strtolower($tokens[$i][1]) == 'namespace') {
-                $j = 1;
-                $namespace = '';
-                while(true) {
-                    if(empty($tokens[$i + $j][1])) {
-                        if($j != 1) {
-                            break;
-                        }
-                    }
-                    $namespace .= $tokens[$i + $j][1];
-                    $j++;
-                }
-                $namespaces[] = trim($namespace); //there can be only one (=> highlander) per file, but by not assuming we could find errors/throw exceptions
-                $i += $j;
-            }
-
-            if(isset($tokens[$i][1]) && strtolower($tokens[$i][1]) == 'class') {
-                $j = 1;
-                $class = '';
-                while(true) {
-                    if(isset($tokens[$i + $j][1]) && trim($tokens[$i + $j][1]) == '') {
-                        if($j != 1) {
-                            break;
-                        }
-                    }
-                    $class .= $tokens[$i + $j][1];
-                    $j++;
-                }
-                $classes[] = trim($class); //there can be only one (=> highlander) per file, but by not assuming we could find errors/throw exceptions
-                $i += $j;
-            }
-        }
-
-        if(empty($namespaces) || empty($classes)) {
-            return '';
-        }
-        return $namespaces[0] . '\\' . $classes[0];
     }
 
     public function getResource($controllerClass)
@@ -173,6 +152,51 @@ class Scanner
             $operations[] = $operation;
         }
         return $operations;
+    }
+
+    protected function getClassName($sourceCode)
+    {
+        $tokens = token_get_all($sourceCode);
+        $tokenLength = count($tokens);
+        for($i = 0; $i < $tokenLength; $i++) {
+
+            if(isset($tokens[$i][1]) && strtolower($tokens[$i][1]) == 'namespace') {
+                $j = 1;
+                $namespace = '';
+                while(true) {
+                    if(empty($tokens[$i + $j][1])) {
+                        if($j != 1) {
+                            break;
+                        }
+                    }
+                    $namespace .= $tokens[$i + $j][1];
+                    $j++;
+                }
+                $namespaces[] = trim($namespace); //there can be only one (=> highlander) per file, but by not assuming we could find errors/throw exceptions
+                $i += $j;
+            }
+
+            if(isset($tokens[$i][1]) && strtolower($tokens[$i][1]) == 'class') {
+                $j = 1;
+                $class = '';
+                while(true) {
+                    if(isset($tokens[$i + $j][1]) && trim($tokens[$i + $j][1]) == '') {
+                        if($j != 1) {
+                            break;
+                        }
+                    }
+                    $class .= $tokens[$i + $j][1];
+                    $j++;
+                }
+                $classes[] = trim($class); //there can be only one (=> highlander) per file, but by not assuming we could find errors/throw exceptions
+                $i += $j;
+            }
+        }
+
+        if(empty($namespaces) || empty($classes)) {
+            return '';
+        }
+        return $namespaces[0] . '\\' . $classes[0];
     }
 
     public function __construct($scanPath = __DIR__)

@@ -4,14 +4,19 @@ namespace Eva\EvaUser\Controllers\Admin;
 
 use Eva\EvaUser\Forms;
 use Eva\EvaUser\Models;
-use Eva\EvaEngine\Mvc\Controller\AuthorityControllerInterface;
+use Eva\EvaEngine\Mvc\Controller\SessionAuthorityControllerInterface;
 
-class UserController extends AdminControllerBase implements AuthorityControllerInterface
+/**
+* @resourceName("Admin User Managment")
+* @resourceDescription("用户管理")
+*/
+class UserController extends AdminControllerBase implements SessionAuthorityControllerInterface
 {
 
     /**
-     * Index action
-     */
+    * @operationName("User List")
+    * @operationDescription("用户列表页")
+    */
      public function indexAction()
      {
         $limit = $this->request->getQuery('limit', 'int', 25);
@@ -45,6 +50,10 @@ class UserController extends AdminControllerBase implements AuthorityControllerI
 
     }
 
+    /**
+    * @operationName("Create User")
+    * @operationDescription("创建用户")
+    */
     public function createAction()
     {
         $user = new Models\User();
@@ -73,6 +82,10 @@ class UserController extends AdminControllerBase implements AuthorityControllerI
         return $this->redirectHandler('/admin/user/edit/' . $form->getModel()->id);
     }
 
+    /**
+    * @operationName("Edit User")
+    * @operationDescription("编辑用户")
+    */
     public function editAction()
     {
         $this->view->changeRender('admin/user/create');

@@ -31,7 +31,7 @@ class MediaController extends ControllerBase
      *     @SWG\Operation(
      *       method="GET",
      *       summary="Get media list",
-     *       notes="Returns a media based on ID",
+     *       notes="Returns media list",
      *       @SWG\Parameters(
      *         @SWG\Parameter(
      *           name="q",
@@ -55,8 +55,15 @@ class MediaController extends ControllerBase
      *           type="integer"
      *         ),
      *         @SWG\Parameter(
-     *           name="cid",
-     *           description="Category ID",
+     *           name="extension",
+     *           description="File Extension",
+     *           paramType="query",
+     *           required=false,
+     *           type="string"
+     *         ),
+     *         @SWG\Parameter(
+     *           name="image",
+     *           description="Only image files : 0/1",
      *           paramType="query",
      *           required=false,
      *           type="integer"
@@ -143,16 +150,6 @@ class MediaController extends ControllerBase
      *           required=true,
      *           type="integer"
      *         )
-     *       ),
-     *       @SWG\ResponseMessages(
-     *          @SWG\ResponseMessage(
-     *            code=400,
-     *            message="Invalid ID supplied"
-     *          ),
-     *          @SWG\ResponseMessage(
-     *            code=404,
-     *            message="media not found"
-     *          )
      *       )
      *     )
      *   )
@@ -198,16 +195,6 @@ class MediaController extends ControllerBase
      *           required=true,
      *           type="string"
      *         )
-     *       ),
-     *       @SWG\ResponseMessages(
-     *          @SWG\ResponseMessage(
-     *            code=400,
-     *            message="Invalid ID supplied"
-     *          ),
-     *          @SWG\ResponseMessage(
-     *            code=404,
-     *            message="media not found"
-     *          )
      *       )
      *     )
      *   )
@@ -258,16 +245,6 @@ class MediaController extends ControllerBase
      *           required=true,
      *           type="file"
      *         )
-     *       ),
-     *       @SWG\ResponseMessages(
-     *          @SWG\ResponseMessage(
-     *            code=400,
-     *            message="Invalid ID supplied"
-     *          ),
-     *          @SWG\ResponseMessage(
-     *            code=404,
-     *            message="media not found"
-     *          )
      *       )
      *     )
      *   )
