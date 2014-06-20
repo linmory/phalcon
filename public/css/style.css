@@ -2384,6 +2384,7 @@ td.datepickerSpecial.datepickerSelected a {
   text-overflow: ellipsis;
   white-space: nowrap;
   display: block;
+  position: relative;
   height: 40px;
   line-height: 40px;
   color: #666;
@@ -2403,7 +2404,6 @@ td.datepickerSpecial.datepickerSelected a {
   margin-right: -15px;
   padding-left: 15px;
   padding-right: 55px;
-  position: relative;
 }
 #main .topnews.list > .item > .link:hover .time {
   display: block;

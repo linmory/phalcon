@@ -1,5 +1,16 @@
 
 $(function(){
+    /*
+     * apple bug 修复
+     */
+    var userAgent = navigator.userAgent.toLowerCase();
+    if (/applewebkit/.test(userAgent)) {
+        $('.topnews').on('click', 'a.link', function(e){
+            location.href = this.href;
+            e.preventDefault();
+        });
+    }
+
     /**
      * 导航栏高亮
      */
