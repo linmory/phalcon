@@ -2432,14 +2432,16 @@ td.datepickerSpecial.datepickerSelected a {
                 color: #666;
                 border-bottom: 1px solid #DCDCDC;
                 .time {
-                    display: none;
-                    right: 15px;
-                    top: 0;
+                    display: block;
+                    color: transparent;
                     width: 40px;
                     position: absolute;
+                    right: 15px;
+                    top: 0;
                     text-align: right;
                 }
-                &:hover {
+                &:hover ,
+                &:focus {
                     background-color: @blue;
                     color: #fff;
                     margin-left: -15px;
@@ -2447,7 +2449,8 @@ td.datepickerSpecial.datepickerSelected a {
                     padding-left: 15px;
                     padding-right: 55px;
                     .time {
-                        display: block;
+                        color: inherit;
+                        //display: block;
                     }
                 }
             }

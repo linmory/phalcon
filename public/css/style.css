@@ -2391,14 +2391,16 @@ td.datepickerSpecial.datepickerSelected a {
   border-bottom: 1px solid #DCDCDC;
 }
 #main .topnews.list > .item .link .time {
-  display: none;
-  right: 15px;
-  top: 0;
+  display: block;
+  color: transparent;
   width: 40px;
   position: absolute;
+  right: 15px;
+  top: 0;
   text-align: right;
 }
-#main .topnews.list > .item .link:hover {
+#main .topnews.list > .item .link:hover,
+#main .topnews.list > .item .link:focus {
   background-color: #005178;
   color: #fff;
   margin-left: -15px;
@@ -2406,8 +2408,9 @@ td.datepickerSpecial.datepickerSelected a {
   padding-left: 15px;
   padding-right: 55px;
 }
-#main .topnews.list > .item .link:hover .time {
-  display: block;
+#main .topnews.list > .item .link:hover .time,
+#main .topnews.list > .item .link:focus .time {
+  color: inherit;
 }
 #main .topnews.list.type1 {
   width: 310px;

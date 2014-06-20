@@ -21,11 +21,9 @@
                         <?foreach($posts as $key => $post):?>
                         <?if($key > 0):?>
                         <li class="item  <?=$post->sortOrder > 0 ? 'text-bold' : ''?>">
-                            <a href="/post/<?=$post->slug?>">
-                                <div class="link">
-                                    <?=$this->escaper->escapeHtml($post->title)?>
-                                    <span class="time"><?=$this->tag->datetime($post->createdAt, 'H:i')?></span>
-                                </div>
+                            <a href="/post/<?=$post->slug?>" class="link">
+                                <?=$this->escaper->escapeHtml($post->title)?>
+                                <span class="time"><?=$this->tag->datetime($post->createdAt, 'H:i')?></span>
                             </a>
                         </li>
                         <?endif?>
