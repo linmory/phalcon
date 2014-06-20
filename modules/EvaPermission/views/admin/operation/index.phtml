@@ -76,7 +76,6 @@
                             <th>Resource</th>
                             <th>Description</th>
                             <th>Roles</th>
-                            <th></th>
                         </tr>
                     </thead>
 
@@ -95,17 +94,20 @@
                                 <span class="label"><?=$item->operationKey?></span>
                             </td>
                             <td>
+                                <span class="label label-info"><?=$item->resource->resourceGroup?></span>
                                 <span class="label label-info"><?=$item->resourceKey?></span>
                             </td>
                             <td><?=$item->description?></td>
                             <td>
                                 <?if($item->roles):?>
                                 <?foreach($item->roles as $role):?>
-                                <span class="label label-success"><?=$role->roleKey?></span>
+                                <button class="btn btn-xs btn-warning ajax-form-sumbit" data-ajax-form="1" date-method="put" data-form-action="/admin/permission/process/relation" data-callback="window.location.reload();">
+                                    <input type="hidden" data-name="roleId" value="<?=$role->id?>" >
+                                    <input type="hidden" data-name="operationId" value="<?=$item->id?>" >
+                                    <?=$role->name?> <?=$role->roleKey?> <i class="icon-remove bigger-120"></i> 
+                                </button>
                                 <?endforeach?>
                                 <?endif?>
-                            </td>
-                            <td>
                             </td>
                         </tr>
                         <?endforeach?>
@@ -114,16 +116,17 @@
 
                 <div class="row">
                     <div class="col-sm-6">
+                        Add To:
                         <div class="btn-group">
-                            <button class="btn btn-xs btn-success ajax-form-sumbit" data-batch-form="1" data-source-name="id" data-source-selectors="#post-grid input[data-batch-source]" date-method="put" data-form-action="/admin/post/process/batch" data-callback="window.location.reload();">
-                                <input type="hidden" data-name="status" value="published" >
-                                <i class="icon-ok bigger-120"></i>
-                            </button>
+                            <?if($roles):?>
+                            <?foreach($roles as $role):?>
+                            <button class="btn btn-xs btn-success ajax-form-sumbit" data-batch-form="1" data-source-name="id" data-source-selectors="#post-grid input[data-batch-source]" date-method="put" data-form-action="/admin/permission/process/batch" data-callback="window.location.reload();">
 
-                            <button class="btn btn-xs ajax-form-sumbit" data-batch-form="1" data-source-name="id" data-source-selectors="#post-grid input[data-batch-source]" date-method="put" data-form-action="/admin/post/process/batch" data-callback="window.location.reload();">
-                                <input type="hidden" data-name="status" value="deleted" >
-                                <i class="icon-eye-close bigger-120"></i>
+                                <input type="hidden" data-name="roleid" value="<?=$role->id?>" >
+                                <?=$role->roleKey?> <?=$role->name?>
                             </button>
+                            <?endforeach?>
+                            <?endif?>
                         </div>
                     </div>
                     <div class="col-sm-6">

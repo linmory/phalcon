@@ -53,6 +53,10 @@ class Operations extends \Eva\EvaEngine\Mvc\Model
             'id',
             array('alias' => 'roles')
         );
+
+        $this->belongsTo("resourceId", 'Eva\EvaPermission\Entities\Resources', "id", array(
+            'alias' => 'resource'
+        ));
         parent::initialize();
     }
 }

@@ -36,6 +36,7 @@ class OperationController extends ControllerBase
         $paginator->setQuery($query);
         $pager = $paginator->getPaginate();
         $this->view->setVar('pager', $pager);
+        $this->view->setVar('roles', Entities\Roles::find());
     }
 
 }

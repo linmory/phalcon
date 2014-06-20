@@ -19,4 +19,10 @@ return array(
         'action' => 1,
         'id' => 3,
     ),
+    '/admin/permission/process/:action(/(\d+))*' =>  array(
+        'module' => 'EvaPermission',
+        'controller' => 'Admin\Process',
+        'action' => 1,
+        'id' => 3,
+    ),
 );
