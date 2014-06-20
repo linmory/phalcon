@@ -2396,8 +2396,7 @@ td.datepickerSpecial.datepickerSelected a {
   position: absolute;
   text-align: right;
 }
-#main .topnews.list > .item > .link:hover,
-#main .topnews.list > .item > .link.active {
+#main .topnews.list > .item > .link:hover {
   background-color: #005178;
   color: #fff;
   margin-left: -15px;
@@ -2406,8 +2405,7 @@ td.datepickerSpecial.datepickerSelected a {
   padding-right: 55px;
   position: relative;
 }
-#main .topnews.list > .item > .link:hover .time,
-#main .topnews.list > .item > .link.active .time {
+#main .topnews.list > .item > .link:hover .time {
   display: block;
 }
 #main .topnews.list.type1 {
