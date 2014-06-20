@@ -1,6 +1,6 @@
 <li class="">
 <a href="#" class="dropdown-toggle">
-    <i class="icon-edit"></i>
+    <i class="icon-comment"></i>
     <span class="menu-text"> Comment </span>
     <b class="arrow icon-angle-down"></b>
 </a>

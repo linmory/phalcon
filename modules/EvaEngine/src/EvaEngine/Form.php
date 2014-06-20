@@ -202,7 +202,6 @@ class Form extends \Phalcon\Forms\Form
         $this->model = $model;
         $this->setEntity($model);
         $reader = new \Phalcon\Annotations\Adapter\Memory();
-        $columns = $model->columnMap();
         $modelProperties = $reader->getProperties($model);
         $formProperties = $reader->getProperties($this);
         foreach ($modelProperties as $key => $property) {

@@ -111,7 +111,7 @@ class Post extends Entities\Posts
 
     public function findPosts(array $query = array())
     {
-        $itemQuery = $this->getDI()->get('modelsManager')->createBuilder();
+        $itemQuery = $this->getDI()->getModelsManager()->createBuilder();
 
         $itemQuery->from(__CLASS__);
 

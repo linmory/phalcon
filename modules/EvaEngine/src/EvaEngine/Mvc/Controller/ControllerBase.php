@@ -149,6 +149,17 @@ class ControllerBase extends Controller
         return $this;
     }
 
+    public function displayModelMessages(\Phalcon\Mvc\Model $model, $messageType = 'warning')
+    {
+        $messages = $model->getMessages();
+        if ($messages) {
+            foreach ($messages as $message) {
+                $this->flashSession->$messageType($message->getMessage());
+            }
+        }
+        return $this;
+    }
+
     public function displayInvalidMessages(\Phalcon\Forms\Form $form, $messageType = 'warning')
     {
         $messages = $form->getMessages();

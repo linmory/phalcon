@@ -74,7 +74,9 @@ class Scanner
             $operationModels[] = $operationModel;
         }
         $resourceModel->operations = $operationModels;
-        if(!$resourceModel->save()) {
+        if($resourceModel->save()) {
+            echo sprintf("Resource %s already added to DB\n", $resource['resourceKey']);
+        } else {
             print_r($resourceModel->getMessages());
         }
 
