@@ -2384,9 +2384,9 @@ td.datepickerSpecial.datepickerSelected a {
   text-overflow: ellipsis;
   white-space: nowrap;
   display: block;
-  position: relative;
   height: 40px;
   line-height: 40px;
+  position: relative;
   color: #666;
   border-bottom: 1px solid #DCDCDC;
 }
@@ -2394,6 +2394,7 @@ td.datepickerSpecial.datepickerSelected a {
   display: none;
   right: 15px;
   top: 0;
+  width: 40px;
   position: absolute;
   text-align: right;
 }
