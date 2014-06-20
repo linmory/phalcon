@@ -49,6 +49,7 @@
                             </th>
                             <th>Name</th>
                             <th>Description</th>
+                            <th>Operations</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -63,13 +64,15 @@
                             </td>
                             <td><?=$item->description?></td>
                             <td>
+                                <a class="btn btn-xs btn-info" href="/admin/permission/operation?roleid=<?=$item->id?>">
+                                        <i class="icon-wrench bigger-120"></i>
+                                        <?=$item->operations ? $item->operations->count() : '0'?> Operations 
+                                </a>
+                            </td>
+                            <td>
                                 <div class="btn-group">
                                     <a class="btn btn-xs btn-info" href="/admin/permission/role/edit/<?=$item->id?>">
-                                        <i class="icon-edit bigger-120"></i>
-                                    </a>
-                                    <a class="btn btn-xs btn-info" href="/admin/permission/operation?roleid=<?=$item->id?>">
-                                        <i class="icon-wrench bigger-120"></i>
-                                        Operations 
+                                        <i class="icon-edit bigger-120"></i> Edit
                                     </a>
                                 </div>
                             </td>

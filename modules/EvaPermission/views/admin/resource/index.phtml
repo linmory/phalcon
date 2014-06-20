@@ -49,6 +49,7 @@
                             <th>Name</th>
                             <th>Key</th>
                             <th>Description</th>
+                            <th>Operations</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -63,10 +64,14 @@
                             <td><span class="label"><?=$item->resourceKey?></span></td>
                             <td><?=$item->description?></td>
                             <td>
-                                <div class="btn-group">
-                                    <a class="btn btn-xs btn-info" href="/admin/post/edit/<?=$item->id?>">
-                                        <i class="icon-wrench  bigger-120"></i> Operations
+                                <a class="btn btn-xs btn-info" href="/admin/permission/operation?q=<?=$this->escaper->escapeHtmlAttr(addslashes($item->resourceKey))?>">
+                                        <i class="icon-wrench  bigger-120"></i>
+                                        <?=$item->operations ? $item->operations->count() : '0'?> Operations
                                     </a>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+
                                 </div>
                             </td>
                         </tr>
