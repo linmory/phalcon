@@ -54,19 +54,30 @@ class Scanner
             return $this;
         }
 
-        $resourceModel = new Entities\Resources();
-        $resourceModel->assign($resource);
+        $resourceModel = Entities\Resources::findFirstByResourceKey($resource['resourceKey']);
+        if($resourceModel){
+            $resourceModel->assign($resource);
+        }
         $operationModels = array();
         foreach($operations as $operation) {
-            $operationModel = new Entities\Operations();
+            $operationModel = Entities\Operations::findFirst(array(
+                "conditions" => "resourceKey = :resourceKey: AND operationKey = :operationKey:",
+                "bind"       => array(
+                    'resourceKey' => $operation['resourceKey'],
+                    'operationKey' => $operation['operationKey'],
+                )
+            ));
+            if(!$operationModel) {
+                $operationModel = new Entities\Operations();
+            }
             $operationModel->assign($operation);
             $operationModels[] = $operationModel;
-
         }
         $resourceModel->operations = $operationModels;
         if(!$resourceModel->save()) {
-            p($resourceModel->getMessages());
+            print_r($resourceModel->getMessages());
         }
+
         /*
         p($resource);
         p($operations);
