@@ -46,6 +46,7 @@
                             <th class="hidden-480">
                                 ID
                             </th>
+                            <th>Group</th>
                             <th>Name</th>
                             <th>Key</th>
                             <th>Description</th>
@@ -58,6 +59,7 @@
                         <?foreach($pager->items as $item):?>
                         <tr>
                             <td class="hidden-480"><?=$item->id?></td>
+                            <td><span class="label"><?=$item->resourceGroup?></span></td>
                             <td>
                                 <?=$item->name?>
                             </td>
