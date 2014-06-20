@@ -57,10 +57,12 @@ class Model extends \Phalcon\Mvc\Model
                 $data[$subdata] = $this->$subdata;
             } elseif (is_array($subdata)) {
                 if (!empty($this->$key)) {
-                    if ($this->$key instanceof SimpleResultSet) {
+                    if ($this->$key instanceof SimpleResultSet || is_array($this->$key)) {
                         $subdatas = array();
                         foreach ($this->$key as $child) {
-                            $subdatas[] = $child->dump($subdata);
+                            if(method_exists($child, 'dump')) {
+                                $subdatas[] = $child->dump($subdata);
+                            }
                         }
                         $data[$key] = $subdatas;
                     } elseif(method_exists($this->$key, 'dump')) {

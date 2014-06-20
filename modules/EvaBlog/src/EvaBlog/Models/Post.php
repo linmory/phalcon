@@ -170,19 +170,21 @@ class Post extends Entities\Posts
 
     public function createPost(array $data)
     {
-        $this->assign($data);
-        $data['categories'] = isset($data['categories']) ? $data['categories'] : array();
         $textData = isset($data['text']) ? $data['text'] : array();
         $tagData = isset($data['tags']) ? $data['tags'] : array();
-        $categoryData = $data['categories'];
+        $categoryData = isset($data['categories']) ? $data['categories'] : array();
 
-        $text = new Text();
-        $text->assign($textData);
-        $this->text = $text;
+        if($textData) {
+            unset($data['text']);
+            $text = new Text();
+            $text->assign($textData);
+            $this->text = $text;
+        }
 
         $tags = array();
         if ($tagData) {
-            $tagArray = explode(',', $tagData);
+            unset($data['tags']);
+            $tagArray = is_array($tagData) ? $tagData : explode(',', $tagData);
             foreach ($tagArray as $tagName) {
                 $tag = new Tag();
                 $tag->tagName = $tagName;
@@ -195,6 +197,7 @@ class Post extends Entities\Posts
 
         $categories = array();
         if ($categoryData) {
+            unset($data['categories']);
             foreach ($categoryData as $categoryId) {
                 $category = Category::findFirst($categoryId);
                 if ($category) {
@@ -204,6 +207,8 @@ class Post extends Entities\Posts
             $this->categories = $categories;
         }
 
+
+        $this->assign($data);
         if (!$this->save()) {
             throw new Exception\RuntimeException('Create post failed');
         }
@@ -212,15 +217,18 @@ class Post extends Entities\Posts
 
     public function updatePost($data)
     {
-        $this->assign($data);
         $data['categories'] = isset($data['categories']) ? $data['categories'] : array();
         $textData = $data['text'];
         $tagData = $data['tags'];
         $categoryData = $data['categories'];
 
-        $text = new Text();
-        $text->assign($textData);
-        $this->text = $text;
+        if($textData) {
+            unset($data['text']);
+            $text = new Text();
+            $text->assign($textData);
+            $this->text = $text;
+        }
+
 
         $tags = array();
         //remove old relations
@@ -228,7 +236,8 @@ class Post extends Entities\Posts
             $this->tagsPosts->delete();
         }
         if ($tagData) {
-            $tagArray = explode(',', $tagData);
+            unset($data['tags']);
+            $tagArray = is_array($tagData) ? $tagData : explode(',', $tagData);
             foreach ($tagArray as $tagName) {
                 $tag = new Tag();
                 $tag->tagName = $tagName;
@@ -245,6 +254,7 @@ class Post extends Entities\Posts
         }
         $categories = array();
         if ($categoryData) {
+            unset($data['categories']);
             foreach ($categoryData as $categoryId) {
                 $category = Category::findFirst($categoryId);
                 if ($category) {
@@ -254,6 +264,7 @@ class Post extends Entities\Posts
             $this->categories = $categories;
         }
 
+        $this->assign($data);
         if (!$this->save()) {
             throw new Exception\RuntimeException('Update post failed');
         }
