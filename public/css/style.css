@@ -2379,7 +2379,7 @@ td.datepickerSpecial.datepickerSelected a {
   width: 100%;
   font-size: 14px;
 }
-#main .topnews.list > .item > .link {
+#main .topnews.list > .item .link {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2390,7 +2390,7 @@ td.datepickerSpecial.datepickerSelected a {
   color: #666;
   border-bottom: 1px solid #DCDCDC;
 }
-#main .topnews.list > .item > .link .time {
+#main .topnews.list > .item .link .time {
   display: none;
   right: 15px;
   top: 0;
@@ -2398,7 +2398,7 @@ td.datepickerSpecial.datepickerSelected a {
   position: absolute;
   text-align: right;
 }
-#main .topnews.list > .item > .link:hover {
+#main .topnews.list > .item .link:hover {
   background-color: #005178;
   color: #fff;
   margin-left: -15px;
@@ -2406,7 +2406,7 @@ td.datepickerSpecial.datepickerSelected a {
   padding-left: 15px;
   padding-right: 55px;
 }
-#main .topnews.list > .item > .link:hover .time {
+#main .topnews.list > .item .link:hover .time {
   display: block;
 }
 #main .topnews.list.type1 {
@@ -2426,16 +2426,16 @@ td.datepickerSpecial.datepickerSelected a {
   font-weight: normal;
   cursor: pointer;
 }
-#main .topnews.list.type1 > .item > .link {
+#main .topnews.list.type1 .link {
   height: 32px;
   line-height: 32px;
-}
-#main .topnews.list.type1 > .item > .link:hover,
-#main .topnews.list.type1 > .item > .link.active {
-  margin-top: -1px;
-  margin-bottom: -1px;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  /*&:hover,
+                &.active {
+                    margin-top: -1px;
+                    margin-bottom: -1px;
+                    padding-top: 1px;
+                    padding-bottom: 1px;
+                }*/
 }
 #main .recommend-news.list {
   margin-bottom: 30px;
