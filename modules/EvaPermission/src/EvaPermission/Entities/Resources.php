@@ -40,7 +40,7 @@ class Resources extends \Eva\EvaEngine\Mvc\Model
     {
         $this->hasMany(
             'id',
-            'Eva\EvaBlog\Entities\Operations',
+            'Eva\EvaPermission\Entities\Operations',
             'resourceId',
             array('alias' => 'operations')
         );

@@ -10,7 +10,7 @@
         </li>
 
         <li>
-        <a href="/admin/post" class="active">Post List</a>
+        <a href="/admin/permission/operation" class="active">Operation List</a>
         </li>
     </ul><!-- .breadcrumb -->
 
@@ -38,50 +38,76 @@
             <div class="table-responsive dataTables_wrapper">
                 <div class="row">
                     <div class="col-sm-12">
+                        <form class="form-inline">
+                            <div class="form-group">
+                                <?=$form->render('q', array(
+                                    'placeholder' => 'Keyword',
+                                    'class' => 'form-control input-sm'
+                                ))?>
+                            </div>
+                            <div class="form-group">
+                            </div>
+                            <div class="form-group">
+                                <?=$form->render('roleid', array(
+                                    'class' => 'form-control input-sm'
+                                ))?>
+                            </div>
+                            <button class="btn btn-info btn-sm form-control" type="submit">
+                                <i class="icon-search bigger-110"></i>
+                                Filter 
+                            </button>
+                        </form>
+
                     </div>
                 </div>
                 <table class="table table-striped table-bordered table-hover dataTable  table-sortable" id="post-grid" data-sortable-key="order" data-sortable-default="-created_at">
                     <thead>
                         <tr>
+                            <th class="center">
+                                <label>
+                                    <input type="checkbox" class="ace">
+                                    <span class="lbl"></span>
+                                </label>
+                            </th>
                             <th class="hidden-480">
                                 ID
                             </th>
                             <th>Name</th>
                             <th>Resource</th>
-                            <th>Description</th>
-                            <th></th>
+                            <th class="hidden-480">Description</th>
+                            <th>Roles</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         <?foreach($pager->items as $item):?>
                         <tr>
-                            <td class="hidden-480"><?=$item->id?></td>
+                            <td class="center">
+                                <label>
+                                    <input type="checkbox" class="ace" value="<?=$item->id?>"  data-batch-source="<?=$item->id?>">
+                                    <span class="lbl"></span>
+                                </label>
+                            </td>
+                            <td><?=$item->id?></td>
                             <td>
                                 <?=$item->name?>
                                 <span class="label"><?=$item->operationKey?></span>
                             </td>
                             <td>
+                                <span class="label label-info"><?=$item->resource->resourceGroup?></span>
                                 <span class="label label-info"><?=$item->resourceKey?></span>
                             </td>
                             <td><?=$item->description?></td>
                             <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-xs btn-success ajax-form-sumbit" data-ajax-form="1" date-method="put" data-form-action="/admin/post/process/status/<?=$item->id?>" data-callback="window.location.reload();">
-                                        <input type="hidden" data-name="status" value="published" >
-                                        <i class="icon-ok bigger-120"></i>
-                                    </button>
-
-                                    <a class="btn btn-xs btn-info" href="/admin/post/edit/<?=$item->id?>">
-                                        <i class="icon-edit bigger-120"></i>
-                                    </a>
-
-                                    <button class="btn btn-xs ajax-form-sumbit" data-ajax-form="1" date-method="put" data-form-action="/admin/post/process/status/<?=$item->id?>" data-callback="window.location.reload();">
-                                        <input type="hidden" data-name="status" value="deleted" >
-                                        <i class="icon-eye-close bigger-120"></i>
-                                    </button>
-
-                                </div>
+                                <?if($item->roles):?>
+                                <?foreach($item->roles as $role):?>
+                                <button class="btn btn-xs btn-warning ajax-form-sumbit" data-ajax-form="1" date-method="put" data-form-action="/admin/permission/process/relation" data-callback="window.location.reload();">
+                                    <input type="hidden" data-name="roleId" value="<?=$role->id?>" >
+                                    <input type="hidden" data-name="operationId" value="<?=$item->id?>" >
+                                    <?=$role->name?> <?=$role->roleKey?> <i class="icon-remove bigger-120"></i> 
+                                </button>
+                                <?endforeach?>
+                                <?endif?>
                             </td>
                         </tr>
                         <?endforeach?>
@@ -90,16 +116,17 @@
 
                 <div class="row">
                     <div class="col-sm-6">
+                        Add To:
                         <div class="btn-group">
-                            <button class="btn btn-xs btn-success ajax-form-sumbit" data-batch-form="1" data-source-name="id" data-source-selectors="#post-grid input[data-batch-source]" date-method="put" data-form-action="/admin/post/process/batch" data-callback="window.location.reload();">
-                                <input type="hidden" data-name="status" value="published" >
-                                <i class="icon-ok bigger-120"></i>
-                            </button>
+                            <?if($roles):?>
+                            <?foreach($roles as $role):?>
+                            <button class="btn btn-xs btn-success ajax-form-sumbit" data-batch-form="1" data-source-name="id" data-source-selectors="#post-grid input[data-batch-source]" date-method="put" data-form-action="/admin/permission/process/batch" data-callback="window.location.reload();">
 
-                            <button class="btn btn-xs ajax-form-sumbit" data-batch-form="1" data-source-name="id" data-source-selectors="#post-grid input[data-batch-source]" date-method="put" data-form-action="/admin/post/process/batch" data-callback="window.location.reload();">
-                                <input type="hidden" data-name="status" value="deleted" >
-                                <i class="icon-eye-close bigger-120"></i>
+                                <input type="hidden" data-name="roleid" value="<?=$role->id?>" >
+                                <?=$role->roleKey?> <?=$role->name?>
                             </button>
+                            <?endforeach?>
+                            <?endif?>
                         </div>
                     </div>
                     <div class="col-sm-6">

@@ -42,4 +42,21 @@ class Operations extends \Eva\EvaEngine\Mvc\Model
      */
     public $description;
 
+    public function initialize()
+    {
+        $this->hasManyToMany(
+            'id',
+            'Eva\EvaPermission\Entities\RolesOperations',
+            'operationId',
+            'roleId',
+            'Eva\EvaPermission\Entities\Roles',
+            'id',
+            array('alias' => 'roles')
+        );
+
+        $this->belongsTo("resourceId", 'Eva\EvaPermission\Entities\Resources', "id", array(
+            'alias' => 'resource'
+        ));
+        parent::initialize();
+    }
 }

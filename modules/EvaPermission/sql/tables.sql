@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS `eva_permission_operations` (
   `resourceId` int(10) NOT NULL,
   `resourceKey` varchar(200) COLLATE utf8_unicode_ci NOT NULL,
   `description` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `operationKey` (`operationKey`,`resourceKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 DROP TABLE IF EXISTS `eva_permission_resources`;
@@ -37,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `eva_permission_roles` (
   `id` int(4) NOT NULL AUTO_INCREMENT,
   `roleKey` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
   `name` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
-  `description` varchar(200) COLLATE utf8_unicode_ci NOT NULL,
+  `description` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `roleKey` (`roleKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;

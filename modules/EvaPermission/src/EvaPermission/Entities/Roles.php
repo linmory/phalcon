@@ -35,10 +35,10 @@ class Roles extends \Eva\EvaEngine\Mvc\Model
     {
         $this->hasManyToMany(
             'id',
-            'Eva\EvaBlog\Entities\RolesOperations',
+            'Eva\EvaPermission\Entities\RolesOperations',
             'roleId',
             'operationId',
-            'Eva\EvaBlog\Entities\Operations',
+            'Eva\EvaPermission\Entities\Operations',
             'id',
             array('alias' => 'operations')
         );

@@ -10,7 +10,7 @@
         </li>
 
         <li>
-        <a href="/admin/post" class="active">Post List</a>
+        <a href="/admin/permission/resource" class="active">Resource List</a>
         </li>
     </ul><!-- .breadcrumb -->
 
@@ -46,9 +46,11 @@
                             <th class="hidden-480">
                                 ID
                             </th>
+                            <th>Group</th>
                             <th>Name</th>
                             <th>Key</th>
                             <th>Description</th>
+                            <th>Operations</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -57,26 +59,20 @@
                         <?foreach($pager->items as $item):?>
                         <tr>
                             <td class="hidden-480"><?=$item->id?></td>
+                            <td><span class="label"><?=$item->resourceGroup?></span></td>
                             <td>
                                 <?=$item->name?>
                             </td>
                             <td><span class="label"><?=$item->resourceKey?></span></td>
                             <td><?=$item->description?></td>
                             <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-xs btn-success ajax-form-sumbit" data-ajax-form="1" date-method="put" data-form-action="/admin/post/process/status/<?=$item->id?>" data-callback="window.location.reload();">
-                                        <input type="hidden" data-name="status" value="published" >
-                                        <i class="icon-ok bigger-120"></i>
-                                    </button>
-
-                                    <a class="btn btn-xs btn-info" href="/admin/post/edit/<?=$item->id?>">
-                                        <i class="icon-edit bigger-120"></i>
+                                <a class="btn btn-xs btn-info" href="/admin/permission/operation?q=<?=$this->escaper->escapeHtmlAttr(addslashes($item->resourceKey))?>">
+                                        <i class="icon-wrench  bigger-120"></i>
+                                        <?=$item->operations ? $item->operations->count() : '0'?> Operations
                                     </a>
-
-                                    <button class="btn btn-xs ajax-form-sumbit" data-ajax-form="1" date-method="put" data-form-action="/admin/post/process/status/<?=$item->id?>" data-callback="window.location.reload();">
-                                        <input type="hidden" data-name="status" value="deleted" >
-                                        <i class="icon-eye-close bigger-120"></i>
-                                    </button>
+                            </td>
+                            <td>
+                                <div class="btn-group">
 
                                 </div>
                             </td>
@@ -87,17 +83,6 @@
 
                 <div class="row">
                     <div class="col-sm-6">
-                        <div class="btn-group">
-                            <button class="btn btn-xs btn-success ajax-form-sumbit" data-batch-form="1" data-source-name="id" data-source-selectors="#post-grid input[data-batch-source]" date-method="put" data-form-action="/admin/post/process/batch" data-callback="window.location.reload();">
-                                <input type="hidden" data-name="status" value="published" >
-                                <i class="icon-ok bigger-120"></i>
-                            </button>
-
-                            <button class="btn btn-xs ajax-form-sumbit" data-batch-form="1" data-source-name="id" data-source-selectors="#post-grid input[data-batch-source]" date-method="put" data-form-action="/admin/post/process/batch" data-callback="window.location.reload();">
-                                <input type="hidden" data-name="status" value="deleted" >
-                                <i class="icon-eye-close bigger-120"></i>
-                            </button>
-                        </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="dataTables_paginate">

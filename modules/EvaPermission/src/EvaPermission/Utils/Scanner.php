@@ -55,9 +55,11 @@ class Scanner
         }
 
         $resourceModel = Entities\Resources::findFirstByResourceKey($resource['resourceKey']);
-        if($resourceModel){
-            $resourceModel->assign($resource);
+        if(!$resourceModel){
+            $resourceModel = new Entities\Resources();
         }
+        $resourceModel->assign($resource);
+
         $operationModels = array();
         foreach($operations as $operation) {
             $operationModel = Entities\Operations::findFirst(array(
