@@ -4,6 +4,7 @@ namespace Eva\EvaPermission\Controllers\Admin;
 
 use Eva\EvaPermission\Entities;
 use Eva\EvaPermission\Forms;
+use Eva\EvaPermission\Models;
 use Eva\EvaEngine\Exception;
 
 class OperationController extends ControllerBase
@@ -14,14 +15,21 @@ class OperationController extends ControllerBase
     public function indexAction()
     {
         $query = array(
+            'q' => $this->request->getQuery('q', 'string'),
+            'rid' => $this->request->getQuery('rid', 'int'),
+            'roleid' => $this->request->getQuery('roleid', 'int'),
             'limit' => 1000,
             'page' => $this->request->getQuery('page', 'int', 1),
         );
-        $itemQuery = $this->getDI()->getModelsManager()->createBuilder()
-            ->from('Eva\EvaPermission\Entities\Operations');
 
+        $form = new Forms\OperationFilterForm();
+        $form->setValues($this->request->getQuery());
+        $this->view->setVar('form', $form);
+
+        $operation = new Models\Operation();
+        $operations = $operation->findOperations($query);
         $paginator = new \Eva\EvaEngine\Paginator(array(
-            "builder" => $itemQuery,
+            "builder" => $operations,
             "limit"=> $query['limit'],
             "page" => $query['page']
         ));
