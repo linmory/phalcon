@@ -27,18 +27,40 @@ class Module implements ModuleDefinitionInterface, StandardInterface
     {
     }
 
+    public static function registerGlobalRelations()
+    {
+        return array(
+            'usersRoles' => array(
+                'module' => 'EvaUser',
+                'entity' => 'Eva\EvaUser\Entities\Users',
+                'relationType' => 'hasManyToMany',
+                'parameters' => array(
+                    'id',
+                    'Eva\EvaPermission\Entities\UsersRoles',
+                    'userId',
+                    'roleId',
+                    'Eva\EvaPermission\Entities\Roles',
+                    'id',
+                    array(
+                        'alias' => 'roles'
+                    )
+                )
+            ),
+        );
+    }
+
     /**
-     * Registers the module auto-loader
-     */
+    * Registers the module auto-loader
+    */
     public function registerAutoloaders()
     {
     }
 
     /**
-     * Registers the module-only services
-     *
-     * @param Phalcon\DI $di
-     */
+    * Registers the module-only services
+    *
+    * @param Phalcon\DI $di
+    */
     public function registerServices($di)
     {
         $dispatcher = $di->getDispatcher();
