@@ -20,6 +20,7 @@ class Module implements ModuleDefinitionInterface, StandardInterface
     {
         return array(
             'dispatch' => 'Eva\EvaPermission\Events\DispatchListener',
+            'user' => 'Eva\EvaPermission\Events\UserListener',
         );
     }
 

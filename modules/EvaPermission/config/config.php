@@ -1,6 +1,11 @@
 <?php
 return array(
     'permission' => array(
+        'superusers' => array(
+            1,
+        ),
+        'superkeys' => array(
+        ),
         'error' => array(
             'module' => '',
             'controller' => '',
@@ -9,7 +14,6 @@ return array(
         ),
         'acl' => array(
             'adapter' => 'Memory',
-            'cache'
         )
     ),
 );

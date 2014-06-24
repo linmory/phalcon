@@ -6,11 +6,13 @@ use Phalcon\Acl\Adapter\Memory as MemoryAcl;
 use Phalcon\Acl;
 use Eva\EvaEngine\Exception;
 use Eva\EvaPermission\Entities;
-use Eva\EvaUser\Models\Login as LoginUser;
+use Eva\EvaPermission\Models\User as LoginUser;
 
 class SessionAuthority
 {
     protected $acl;
+
+    protected $user;
 
     public function getAcl()
     {
@@ -41,9 +43,24 @@ class SessionAuthority
     {
         $roles = Entities\Roles::findFirst();
         $user = $this->getUser();
+
         if(!$user->isUserLoggedIn()) {
             return false;
         }
+
+        if($user->isSuperUser()) {
+            return true;
+        }
+
+        $roles = $user->getRoles();
+        $acl = $this->acl;
+        foreach($roles as $role) {
+            //If any of roles allowed permission
+            if($acl->isAllowed($role, $resource, $operation)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function __construct()
@@ -52,13 +69,14 @@ class SessionAuthority
         $acl->setDefaultAction(Acl::DENY);
         $roles = Entities\Roles::find();
         foreach($roles as $role) {
-            $acl->addRole($role->roleKey, $role->description);
+            $roleName = $role->name ? $role->name : $role->roleKey;
+            $acl->addRole($role->roleKey, $role->roleKey);
         }
         $resources = Entities\Resources::find();
         foreach($resources as $resource) {
             $acl->addResource($resource->resourceKey);
         }
-        $operations = Entities\RolesOperations::find();
+        $operations = Entities\Operations::find();
         foreach($operations as $operation) {
             $acl->addResourceAccess($operation->resourceKey, $operation->operationKey);
             if($operation->roles) {
