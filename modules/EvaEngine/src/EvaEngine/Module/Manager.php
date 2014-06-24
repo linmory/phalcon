@@ -89,6 +89,11 @@ class Manager implements EventsAwareInterface
         return false;
     }
 
+    public function hasModule($moduleName)
+    {
+        return isset($this->modules[$moduleName]) ? true : false;
+    }
+
     public function getModules()
     {
         return $this->modules;
