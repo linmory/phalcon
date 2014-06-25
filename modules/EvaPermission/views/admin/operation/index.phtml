@@ -101,7 +101,7 @@
                             <td>
                                 <?if($item->roles):?>
                                 <?foreach($item->roles as $role):?>
-                                <button class="btn btn-xs btn-warning ajax-form-sumbit" data-ajax-form="1" date-method="put" data-form-action="/admin/permission/process/relation" data-callback="window.location.reload();">
+                                <button class="btn btn-xs btn-warning ajax-form-sumbit" data-ajax-form="1" date-method="put" data-form-action="/admin/permission/process/relation" data-callback="form.remove();">
                                     <input type="hidden" data-name="roleId" value="<?=$role->id?>" >
                                     <input type="hidden" data-name="operationId" value="<?=$item->id?>" >
                                     <?=$role->name?> <?=$role->roleKey?> <i class="icon-remove bigger-120"></i> 

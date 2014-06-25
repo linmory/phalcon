@@ -2422,23 +2422,26 @@ td.datepickerSpecial.datepickerSelected a {
         &>.item {
             width: 100%;
             font-size: 14px;
-            &>.link {
+            .link {
                 .ellipsis;
                 display: block;
-                position: relative;
                 //width: 100%;
                 height: 40px;
                 line-height: 40px;
+                position: relative;
                 color: #666;
                 border-bottom: 1px solid #DCDCDC;
                 .time {
-                    display: none;
+                    display: block;
+                    color: transparent;
+                    width: 40px;
+                    position: absolute;
                     right: 15px;
                     top: 0;
-                    position: absolute;
                     text-align: right;
                 }
-                &:hover {
+                &:hover ,
+                &:focus {
                     background-color: @blue;
                     color: #fff;
                     margin-left: -15px;
@@ -2446,7 +2449,8 @@ td.datepickerSpecial.datepickerSelected a {
                     padding-left: 15px;
                     padding-right: 55px;
                     .time {
-                        display: block;
+                        color: inherit;
+                        //display: block;
                     }
                 }
             }
@@ -2467,16 +2471,16 @@ td.datepickerSpecial.datepickerSelected a {
                     cursor: pointer;
                 }
             }
-            &>.item>.link {
+            .link {
                 height: 32px;
                 line-height: 32px;
-                &:hover,
+                /*&:hover,
                 &.active {
                     margin-top: -1px;
                     margin-bottom: -1px;
                     padding-top: 1px;
                     padding-bottom: 1px;
-                }
+                }*/
             }
         }
     }
