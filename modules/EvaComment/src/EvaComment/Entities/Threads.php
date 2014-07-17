@@ -36,7 +36,7 @@ class Threads extends BaseModel
      *
      * @var string
      */
-    public $isCommentAble;
+    public $defaultCommentStatus;
 
     /**
      *
